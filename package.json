@@ -11,7 +11,8 @@
     "build:dev": "",
     "test": "ng test",
     "lint": "ng lint",
-    "e2e": "ng e2e"
+    "e2e": "ng e2e",
+    "postinstall":"ngcc"
   },
   "private": true,
   "dependencies": {
@@ -77,6 +78,6 @@
   },
   "description": "An Ionic project",
   "engines" : {
-    "node" : ">=14.18.2"
+    "node" : ">=14.18.2 < 16.13.1"
   }
 }
