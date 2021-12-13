@@ -1,0 +1,77 @@
+<ion-header translucent>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button routerLink="/konfiguracija/linije">Nazad</ion-button>
+    </ion-buttons>
+    <ion-title>Uredi Liniju</ion-title>
+  </ion-toolbar>
+</ion-header>
+<ion-content fullscreen class="ion-padding">
+  <ng-container *ngIf="updateBusLineForm">
+    <form [formGroup]="updateBusLineForm">
+      <ion-list>
+        <ion-item>
+          <ion-label position="stacked">Mjesto polaska</ion-label>
+          <ion-input formControlName="lineCityStart" placeholder="Unesite grad" type="text"></ion-input>
+          <ion-text color="danger" *ngIf="!updateBusLineForm.controls.lineCityStart.valid && updateBusLineForm.controls.lineCityStart.dirty" class="invalid-field">
+            Polje Mjesto polaska je obavezno.
+          </ion-text>
+        </ion-item>
+
+        <ion-item>
+          <ion-label position="stacked">Mjesto odredišta</ion-label>
+          <ion-input formControlName="lineCityEnd" placeholder="Unesite grad" type="text"></ion-input>
+          <ion-text color="danger" *ngIf="!updateBusLineForm.controls.lineCityEnd.valid && updateBusLineForm.controls.lineCityEnd.dirty" class="invalid-field">
+            Polje Mjesto odredišta je obavezno.
+          </ion-text>
+        </ion-item>
+
+        <ion-item>
+          <ion-label position="stacked">Cijena (1 pravac)</ion-label>
+          <ion-input formControlName="linePriceOneWay" placeholder="Unesite cijenu" type="number"></ion-input>
+          <ion-text color="danger" *ngIf="!updateBusLineForm.controls.linePriceOneWay.valid && updateBusLineForm.controls.linePriceOneWay.dirty" class="invalid-field">
+            Polje Cijena (1 pravac) je obavezno.
+          </ion-text>
+        </ion-item>
+
+        <ion-item>
+          <ion-label position="stacked">Cijena (povratna)</ion-label>
+          <ion-input formControlName="linePriceRoundTrip" placeholder="Unesite cijenu" type="number"></ion-input>
+          <ion-text color="danger" *ngIf="!updateBusLineForm.controls.linePriceRoundTrip.valid && updateBusLineForm.controls.linePriceRoundTrip.dirty" class="invalid-field">
+            Polje Cijena (povratna) je obavezno.
+          </ion-text>
+        </ion-item>
+
+        <ion-item>
+          <ion-label>Polazak iz države</ion-label>
+        </ion-item>
+
+        <ion-item>
+          <ion-segment color="primary" formControlName="lineCountryStart">
+            <ion-segment-button color="primary" value="bih">
+              <ion-label>BiH</ion-label>
+            </ion-segment-button>
+            <ion-segment-button value="de">
+              <ion-label>Njemačka</ion-label>
+            </ion-segment-button>
+          </ion-segment>
+        </ion-item>
+
+        <ion-item>
+          <ion-label position="standard">Dani polaska: {{ optionsStart[updateBusLineForm.controls.lineStartDay1.value].text }}, {{ optionsStart[updateBusLineForm.controls.lineStartDay2.value].text }}</ion-label>
+          <ion-button slot="end" size="small" color="primary" (click)="openPicker()">Odaberi</ion-button>
+        </ion-item>
+
+        <ion-item>
+          <ion-label slot="start">Vrijeme polaska</ion-label>
+          <ion-datetime formControlName="lineStartTime" slot="end" display-format="HH:mm" minuteValues="0, 05 10, 15, 20, 25, 30, 35, 40, 45, 50, 55" picker-format="HH:mm" value="2021-02-19T07:43Z"></ion-datetime>
+        </ion-item>
+
+      </ion-list>
+    </form>
+
+    <ion-button [disabled]="!updateBusLineForm.valid" (click)="updateBusLine()" class="submit-ticket" size="large" expand="full" color="primary">Sačuvaj promjene
+      <ion-icon name="checkmark-outline" size="large"></ion-icon>
+    </ion-button>
+  </ng-container>
+</ion-content>

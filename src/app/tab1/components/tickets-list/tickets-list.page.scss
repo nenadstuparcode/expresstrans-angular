@@ -1,0 +1,44 @@
+.ticket-list {
+  background: #e8e8e8;
+  & .ticket {
+    overflow: visible;
+    margin: 20px 5px;
+    &-item {
+      position: relative;
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      font-weight: bold;
+    }
+    &-payed-icon {
+      height: 20px;
+      width: 20px;
+    }
+    &-edit {
+      position: absolute;
+      right: 7.5px;
+      top: 0px;
+      &-option {
+        margin: 7px 0;
+      }
+    }
+    &-date {
+      position: absolute;
+      bottom: -12px;
+      right: -5px;
+      display: flex;
+      align-items: center;
+      background: #b682b0;
+      color: white;
+      padding: 3px;
+      border-radius: 4px;
+      font-weight: bold;
+    }
+  }
+}
+
+.add-icon {
+  position: absolute;
+  bottom:15px;
+  right: 30px;
+}

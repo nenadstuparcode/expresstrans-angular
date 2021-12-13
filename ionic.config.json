@@ -1,0 +1,7 @@
+{
+  "name": "ExpressTransApp",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular"
+}

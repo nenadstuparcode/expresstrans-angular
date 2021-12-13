@@ -1,0 +1,28 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Uloguj Se</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-card>
+   <form [formGroup]="loginForm">
+     <ion-item>
+       <ion-label position="stacked">Email Adresa</ion-label>
+       <ion-input type="email" formControlName="email"></ion-input>
+     </ion-item>
+
+     <ion-item>
+       <ion-label position="stacked">Lozinka</ion-label>
+       <ion-input formControlName="password" [type]="showPassword1 ? 'text' : 'password'"></ion-input>
+       <ion-badge class="show-pass-badge" (click)="toggleShowPassword1()">{{ showPassword1 ? 'Sakrij' : 'Prikaži'}}</ion-badge>
+     </ion-item>
+
+     <ion-button [disabled]="!loginForm.valid" (click)="login()" type="" class="login-button">Uloguj se</ion-button>
+   </form>
+
+    <ion-button size="small" class="login-button" [routerLink]="['/register']">Registruj se</ion-button>
+
+  </ion-card>
+
+</ion-content>

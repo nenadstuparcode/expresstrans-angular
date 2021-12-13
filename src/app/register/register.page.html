@@ -1,0 +1,45 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Registracija</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-card>
+    <form [formGroup]="registrationForm">
+      <ion-item>
+        <ion-label position="stacked">Ime</ion-label>
+        <ion-input type="text" formControlName="firstName"></ion-input>
+      </ion-item>
+
+      <ion-item>
+        <ion-label position="stacked">Prezime</ion-label>
+        <ion-input type="text" formControlName="lastName"></ion-input>
+      </ion-item>
+
+      <ion-item>
+        <ion-label position="stacked">Email Adresa</ion-label>
+        <ion-input type="text" formControlName="email"></ion-input>
+      </ion-item>
+
+      <ion-item>
+        <ion-label position="stacked">Vaša Nova Lozinka</ion-label>
+        <ion-input formControlName="password" [type]="showPassword1 ? 'text' : 'password'"></ion-input>
+        <ion-badge class="show-pass-badge" (click)="toggleShowPassword1()">{{ showPassword1 ? 'Sakrij' : 'Prikaži'}}</ion-badge>
+      </ion-item>
+
+      <ion-item>
+        <ion-label position="stacked">Potvrdite Vašu lozinku</ion-label>
+        <ion-input formControlName="confirmPassword" [type]="showPassword2 ? 'text' : 'password'"></ion-input>
+        <ion-badge class="show-pass-badge" (click)="toggleShowPassword2()">{{ showPassword2 ? 'Sakrij' : 'Prikaži'}}</ion-badge>
+      </ion-item>
+
+      <ion-button (click)="register()" [disabled]="registrationForm.invalid" class="login-button">Uloguj se</ion-button>
+
+      <ion-button size="small" class="login-button" [routerLink]="['/login']">Uloguj Se</ion-button>
+    </form>
+
+
+  </ion-card>
+
+</ion-content>

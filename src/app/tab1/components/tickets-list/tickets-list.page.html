@@ -1,0 +1,53 @@
+<ion-content>
+  <ion-refresher (ionRefresh)="getTickets('', 10, $event)" slot="fixed" pullFactor="0.5" pullMin="100" pullMax="200">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <ion-grid class="ticket-list">
+      <ion-row>
+        <ion-col [formGroup]="searchBarForm" size-xs="12" size-md="6" offset-md="3">
+          <ion-searchbar formControlName="searchTerm" placeholder="Pretraži"></ion-searchbar>
+        </ion-col>
+        <ion-col size-md="6" offset-md="3">
+          <ion-card *ngFor="let ticket of tickets" class="ticket">
+            <ion-grid>
+              <ion-row>
+                <ion-col size="2">
+                  <ion-icon size="large" color="primary" name="ticket-sharp"></ion-icon>
+                </ion-col>
+                <ion-col size="10">
+                  <ion-label class="ticket-item">{{ticket.ticketOnName}} - {{ ticket.ticketPhone }}</ion-label>
+                  <ion-label class="ticket-item">{{ticket.busLineData.lineCountryStart === 'bih' ? '(BIH)' : '(DE)'}} {{ ticket.busLineData.lineCityStart }} - {{ ticket.busLineData.lineCityEnd}}</ion-label>
+                  <ion-label class="ticket-item"><ion-icon class="ticket-payed-icon" color="success" name="checkmark-circle-sharp"> </ion-icon> Plaćenje pri polasku</ion-label>
+
+                  <div class="ticket-date">
+                    <ion-icon size="small" name="time"></ion-icon>
+                    <ion-label> {{ticket.ticketStartDate | date }} ({{ ticket.busLineData.lineStartTime | date: "HH:mm" }})</ion-label>
+                  </div>
+
+                  <div class="ticket-edit">
+                    <ion-icon (click)="presentActionSheet(ticket)"  size="large" name="ellipsis-horizontal-sharp"></ion-icon>
+                  </div>
+
+                </ion-col>
+              </ion-row>
+            </ion-grid>
+
+          </ion-card>
+        </ion-col>
+      </ion-row>
+  </ion-grid>
+
+  <!-- Floating Icon -->
+  <ion-infinite-scroll *ngIf="ticketsCount > searchLimit" threshold="40px" (ionInfinite)="getMoreTickets()">
+    <ion-infinite-scroll-content
+      loadingSpinner="bubbles"
+      loadingText="Učitavanje rezultata...">
+    </ion-infinite-scroll-content>
+  </ion-infinite-scroll>
+  <ion-fab class="add-icon" vertical="end" horizontal="end" slot="fixed">
+    <ion-fab-button (click)="createTicket()">
+      <ion-icon color="light" size="large" name="add-sharp"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+</ion-content>

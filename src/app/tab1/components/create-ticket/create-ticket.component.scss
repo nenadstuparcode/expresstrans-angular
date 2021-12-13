@@ -1,0 +1,13 @@
+.mat-form-field {
+  display: block;
+  position: relative;
+}
+.date-container {
+  position: relative;
+}
+.select-date {
+  position: absolute;
+  top:50%;
+  right: 20px;
+  transform: translateY(-90%);
+}

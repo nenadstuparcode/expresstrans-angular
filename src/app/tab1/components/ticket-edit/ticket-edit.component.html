@@ -1,0 +1,71 @@
+<ion-header translucent>
+  <ion-toolbar color="primary">
+    <ion-title>Kreiraj Kartu</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="dismissModal()">Odustani</ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+<ion-content fullscreen>
+  <ng-container *ngIf="editTicketForm">
+    <ion-list [formGroup]="editTicketForm">
+      <ion-item>
+        <ion-label position="stacked">Ime Putnika</ion-label>
+        <ion-input formControlName="ticketOnName" placeholder="Ime Prezime"></ion-input>
+      </ion-item>
+
+      <ion-item>
+        <ion-label position="stacked">Broj Telefona</ion-label>
+        <ion-input formControlName="ticketPhone" placeholder="+38765111333" type="text"></ion-input>
+      </ion-item>
+
+      <ion-item>
+        <ion-label position="stacked">Email</ion-label>
+        <ion-input formControlName="ticketEmail" placeholder="vaš email" type="text"></ion-input>
+      </ion-item>
+
+      <ion-item>
+        <ion-label position="stacked">Napomena</ion-label>
+        <ion-textarea formControlName="ticketNote" placeholder="Unesite Napomenu"></ion-textarea>
+      </ion-item>
+
+      <ion-item>
+        <ion-label position="stacked">Karta Validna</ion-label>
+        <ion-input formControlName="ticketValid" type="number"></ion-input>
+      </ion-item>
+
+      <ion-item>
+        <ion-text *ngIf="pickedOption?.linija?.text; else noLineSelected">{{ pickedOption.linija?.text}}</ion-text>
+        <ng-template #noLineSelected>
+          <ion-text>Linija nije odabrana</ion-text>
+        </ng-template>
+        <ion-button slot="end" color="primary" size="small" (click)="openPicker()">Odaberi liniju</ion-button>
+      </ion-item>
+
+      <ion-item>
+        <ion-label>Povratna</ion-label>
+        <ion-toggle formControlName="ticketRoundTrip"></ion-toggle>
+      </ion-item>
+
+      <ion-item class="date-container">
+        <mat-form-field appearance="legacy">
+          <ion-label>Datum Polaska</ion-label>
+          <input matInput [min]="minDate" [matDatepickerFilter]="myFilter" formControlName="ticketStartDate" [matDatepicker]="picker" (dateChange)="selectDate($event)">
+          <mat-datepicker #picker></mat-datepicker>
+        </mat-form-field>
+        <ion-button class="select-date" color="primary" size="small" mat-raised-button (click)="picker.open()">Podesi</ion-button>
+      </ion-item>
+
+      <ion-item *ngIf="startTime">
+        <ion-label>Vrijeme polaska: {{ startTime | date: "HH:mm"}} </ion-label>
+      </ion-item>
+
+    </ion-list>
+
+    <ion-button [disabled]="!editTicketForm.valid" (click)="updateTicket()" class="submit-ticket" size="large" expand="full" color="primary">Ažuriraj
+      <ion-icon name="checkmark-outline" size="large"></ion-icon>
+    </ion-button>
+  </ng-container>
+
+</ion-content>
+

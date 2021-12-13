@@ -1,0 +1,20 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Verifikacioni Kod</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-card>
+
+    <ion-item>
+      <ion-label position="stacked">Verifikacioni Kod (4 cifre)</ion-label>
+      <ion-input type="number" [maxlength]="4" [minlength]="4"></ion-input>
+    </ion-item>
+
+    <ion-button (click)="sendVerificationCode()" [disabled]="true" class="login-button">Potvrdi Kod</ion-button>
+    <ion-button (click)="resendVerificationCode()" class="login-button" size="small">Posalji novi kod</ion-button>
+
+  </ion-card>
+
+</ion-content>
