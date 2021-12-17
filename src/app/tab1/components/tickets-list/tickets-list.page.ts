@@ -114,7 +114,7 @@ export class TicketsListPage implements OnInit, OnDestroy {
           event.target.complete();
         }
       }),
-      finalize(() => {
+      tap(() => {
         this.loadingController.dismiss();
       }),
       catchError((err: any) => {
@@ -150,12 +150,16 @@ export class TicketsListPage implements OnInit, OnDestroy {
           this.tickets = [...this.tickets, ...tickets];
           this.ticketsCount = this.tickets.length;
         }),
-        finalize(() => {
+        tap(() => {
           if(this.ticketsCount > this.searchLimit) {
             this.infiniteScroll.disabled = true;
           }
 
           this.loadingController.dismiss();
+        }),
+        catchError((error: Error) => {
+          this.loadingController.dismiss();
+          return throwError(error);
         }),
       ).subscribe();
     } else {
@@ -227,8 +231,12 @@ export class TicketsListPage implements OnInit, OnDestroy {
     this.presentLoading('Karta se šalje na korisnikov email...')
     this.ticketService.emailTicket(ticket).pipe(
       filter((data: boolean) => !!data),
-      finalize(() => {
+      tap(() => {
         this.loadingController.dismiss();
+      }),
+      catchError((error: Error) => {
+        this.loadingController.dismiss();
+        return throwError(error);
       }),
       takeUntil(this.componentDestroyed$),
     ).subscribe();
@@ -302,7 +310,7 @@ export class TicketsListPage implements OnInit, OnDestroy {
         window.open(fileURL);
         saveAs(file, 'karta-express-trans.pdf');
       }),
-      finalize(() => {
+      tap(() => {
         this.loadingController.dismiss();
       }),
       catchError((error: Error) => {
@@ -317,8 +325,12 @@ export class TicketsListPage implements OnInit, OnDestroy {
     this.presentLoading(`Brisanje karte na ime "${ticket.ticketOnName}" u toku...`);
     this.ticketService.deleteTicket(ticket._id).pipe(
       filter((data: ITicket) => !!data),
-      finalize(() => {
+      tap(() => {
         this.loadingController.dismiss();
+      }),
+      catchError((error: Error) => {
+        this.loadingController.dismiss();
+        return throwError(error);
       }),
       takeUntil(this.componentDestroyed$),
     ).subscribe();
