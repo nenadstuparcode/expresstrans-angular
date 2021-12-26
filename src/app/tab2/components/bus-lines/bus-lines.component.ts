@@ -37,14 +37,14 @@ export class BusLinesComponent implements OnInit, OnDestroy {
     color: '#E63135'
   };
   public busLines: IBusLine[] = [];
-  public optionsStart: PickerColumnOption[] = [
-    { text: 'Ponedeljak', value: 0},
-    { text: 'Utorak', value: 1},
-    { text: 'Srijeda', value: 2},
-    { text: 'Četvrtak', value: 3},
-    { text: 'Petak', value: 4},
-    { text: 'Subota', value: 5},
-    { text: 'Nedelja', value: 6},
+  public availableDays: PickerColumnOption[] = [
+    { text: 'Nedelja', value: 0},
+    { text: 'Ponedeljak', value: 1},
+    { text: 'Utorak', value: 2},
+    { text: 'Srijeda', value: 3},
+    { text: 'Četvrtak', value: 4},
+    { text: 'Petak', value: 5},
+    { text: 'Subota', value: 6},
   ];
 
   constructor(

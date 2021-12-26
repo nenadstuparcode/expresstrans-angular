@@ -5,16 +5,19 @@
 </ion-header>
 
 <ion-content>
-  <ion-card>
+  <ion-row>
+    <ion-col size-md="4" offset-md="4">
+      <ion-card>
 
-    <ion-item>
-      <ion-label position="stacked">Verifikacioni Kod (4 cifre)</ion-label>
-      <ion-input type="number" [maxlength]="4" [minlength]="4"></ion-input>
-    </ion-item>
+        <ion-item>
+          <ion-label position="stacked">Verifikacioni Kod (4 cifre)</ion-label>
+          <ion-input type="number" [maxlength]="4" [minlength]="4"></ion-input>
+        </ion-item>
 
-    <ion-button (click)="sendVerificationCode()" [disabled]="true" class="login-button">Potvrdi Kod</ion-button>
-    <ion-button (click)="resendVerificationCode()" class="login-button" size="small">Posalji novi kod</ion-button>
+        <ion-button (click)="sendVerificationCode()" [disabled]="true" class="login-button">Potvrdi Kod</ion-button>
+        <ion-button (click)="resendVerificationCode()" class="login-button" size="small">Posalji novi kod</ion-button>
 
-  </ion-card>
-
+      </ion-card>
+    </ion-col>
+  </ion-row>
 </ion-content>

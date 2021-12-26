@@ -19,14 +19,12 @@ export class TicketService {
   public createTicket(payload: ICreateTicketPayload): Observable<ICommonResponse<ICreateTicketResponse>> {
     return this.http.post(`${environment.apiUrl}/ticket`, payload).pipe(
       filter((data: ICommonResponse<ICreateTicketResponse>) => !!data),
-      tap((data: ICommonResponse<ICreateTicketResponse>) => console.log(data.data)),
     );
   }
 
   public getTickets(): Observable<ITicket[]> {
     return this.http.get(`${environment.apiUrl}/ticket`).pipe(
       filter((data: ICommonResponse<ITicket[]>) => !!data),
-      tap((data: ICommonResponse<ITicket[]>) => console.log(data.data)),
       pluck('data'),
     );
   }
@@ -34,29 +32,24 @@ export class TicketService {
   public getTicket(id: string): Observable<ICommonResponse<ITicket>> {
     return this.http.get(`http://localhost:3000/api/busLine/${id}`).pipe(
       filter((data: ICommonResponse<ITicket>) => !!data),
-      tap((data: ICommonResponse<ITicket>) => console.log(data.data)),
     );
   }
 
   public updateTicket(payload: ICreateTicketPayload, id: string): Observable<ICommonResponse<ITicket>> {
     return this.http.put(`${environment.apiUrl}/ticket/${id}`, payload).pipe(
       filter((data: ICommonResponse<ITicket>) => !!data),
-      tap((data: ICommonResponse<ITicket>) => console.log(data.data)),
     );
   }
 
-  public deleteTicket(id: string): Observable<ITicket> {
+  public deleteTicket(id: string): Observable<ICommonResponse<any>> {
     return this.http.delete(`${environment.apiUrl}/ticket/${id}`).pipe(
       filter((data: ICommonResponse<ITicket>) => !!data),
-      tap((data: ICommonResponse<ITicket>) => console.log(data.data)),
-      pluck('data'),
     );
   }
 
   public searchTickets(payload : {searchTerm: string, searchLimit: number}): Observable<ICommonResponse<ITicket[]>> {
     return this.http.post(`${environment.apiUrl}/ticket/search`, payload ).pipe(
       filter((data: ICommonResponse<ITicket[]>) => !!data),
-      tap((data: ICommonResponse<ITicket[]>) => console.log(data.data)),
     )
   }
 

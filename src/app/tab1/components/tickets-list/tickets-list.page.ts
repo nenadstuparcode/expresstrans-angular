@@ -1,20 +1,18 @@
 import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import { saveAs } from 'file-saver';
-import {DomSanitizer} from '@angular/platform-browser';
 import {
   ActionSheetController, IonInfiniteScroll, LoadingController,
   MenuController,
   ModalController,
-  PickerController,
+  PickerController, Platform, ToastController,
 } from '@ionic/angular';
-import {from, Subject, throwError} from 'rxjs';
+import {Subject, throwError} from 'rxjs';
 import {
   catchError,
   concatMap,
   debounceTime,
   distinctUntilChanged,
   filter,
-  finalize,
   map,
   take,
   takeUntil,
@@ -30,7 +28,9 @@ import {IBusLine} from "@app/tab2/tab2.interface";
 import {ICommonResponse} from "@app/services/user.interface";
 import {FormBuilder, FormGroup} from "@angular/forms";
 import {TicketEditComponent} from "@app/tab1/components/ticket-edit/ticket-edit.component";
-import {tick} from "@angular/core/testing";
+import {File} from "@ionic-native/file";
+import {FileOpener} from "@ionic-native/file-opener";
+import {CallNumber} from "@awesome-cordova-plugins/call-number/ngx";
 
 @Component({
   selector: 'app-tickets-list',
@@ -41,12 +41,12 @@ export class TicketsListPage implements OnInit, OnDestroy {
   @ViewChild(IonInfiniteScroll) infiniteScroll: IonInfiniteScroll;
   @ViewChild('link') link: any;
   public componentDestroyed$: Subject<void> = new Subject<void>();
-  public isMenuOpened = false;
   public searchLimit: number = 10;
   public ticketsCount: number = 10;
   public searchTermValue: string = '';
   public searchBarForm: FormGroup;
-
+  public bihImage: string = 'assets/images/bih.png';
+  public deImage: string = 'assets/images/germany.png';
   public tickets: ITicket[] = [];
   public busLines: IBusLine[] = [];
   public ticketToPrintLink: string;
@@ -62,9 +62,12 @@ export class TicketsListPage implements OnInit, OnDestroy {
     private ticketService: TicketService,
     private busLineService: BusLineService,
     private fb: FormBuilder,
-    private sanitizer:DomSanitizer,
     private loadingController: LoadingController,
-    ) { }
+    private platform: Platform,
+    private toastController: ToastController,
+    private callNumber: CallNumber,
+
+    ) {}
 
   ngOnInit() {
     this.searchBarForm = this.fb.group({
@@ -74,31 +77,30 @@ export class TicketsListPage implements OnInit, OnDestroy {
     this.searchBarForm.get('searchTerm').valueChanges.pipe(
       debounceTime(1200),
       distinctUntilChanged(),
-      tap((data: string) => data.length ? this.getTickets(data, 10): this.getTickets('', 10)),
+      tap((data: string) => {
+        console.log('from search func')
+        data.length ? this.getTickets(data, 10) : this.getTickets('', 10)
+      }),
       takeUntil(this.componentDestroyed$),
     ).subscribe();
 
     this.getTickets('', this.searchLimit);
   }
 
-  public sanitize(url:string){
-    return this.sanitizer.bypassSecurityTrustUrl(url);
-  }
-
   public getTickets(searchTerm: string, searchLimit: number, event?: any): void {
+    console.log('get tickets');
+
     this.presentLoading('Učitavanje karti...')
     this.busLineService.getBusLines().pipe(
       filter((data: IBusLine[]) => !!data),
-      tap((data: IBusLine[]) => {
-        this.busLines = data;
-        console.log(data);
-      }),
+      tap((data: IBusLine[]) => this.busLines = data),
       concatMap(() => this.ticketService.searchTickets({ searchTerm: searchTerm,searchLimit: searchLimit})),
       filter((data: ICommonResponse<ITicket[]>) => !!data),
       map((data: ICommonResponse<ITicket[]>) => {
         this.ticketsCount = data.count;
         this.searchLimit = searchLimit;
         this.searchTermValue = searchTerm;
+
         return data.data.map((ticket: ITicket) => {
           return {
             ...ticket,
@@ -108,19 +110,15 @@ export class TicketsListPage implements OnInit, OnDestroy {
       }),
       tap((data: ITicket[]) => {
         this.tickets = data;
-        console.log(this.tickets);
 
         if(event) {
           event.target.complete();
         }
-      }),
-      tap(() => {
+
         this.loadingController.dismiss();
       }),
       catchError((err: any) => {
-        if(event) {
-          event.target.complete();
-        }
+        if(event) { event.target.complete() }
 
         this.loadingController.dismiss();
 
@@ -168,18 +166,8 @@ export class TicketsListPage implements OnInit, OnDestroy {
     }
   }
 
-  public logout(): void {
-    this.service.logout();
-  }
-
   public getBusLineData(busLineId: string): IBusLine {
     return this.busLines.find((line: IBusLine) => line._id === busLineId);
-  }
-
-  public viewTyre(id: number): void {
-    if(id) {
-      this.router.navigate([`/gume/lista/${id}`]);
-    }
   }
 
   async presentActionSheet(ticket: ITicket) {
@@ -193,33 +181,42 @@ export class TicketsListPage implements OnInit, OnDestroy {
         handler: () => {
           this.editTicket(ticket);
         }
-      }, {
+      },
+      {
         text: 'Poništi',
         icon: 'trash-sharp',
         handler: () => {
           this.deleteTicket(ticket);
         }
-      }, {
+      },
+      {
         text: 'Pošalji na email',
         icon: 'mail-sharp',
         handler: () => {
           this.emailTicket(ticket);
         }
-      }, {
+      },
+      {
         text: 'Štampaj',
         icon: 'print',
         handler: () => {
           console.log(ticket);
           this.printTicket(ticket);
         }
-      }, {
+      },
+      {
+          text: 'Pozovi',
+          icon: 'call',
+          handler: () => {
+            this.callCustomer(ticket.ticketPhone);
+          }
+        },
+        {
         text: 'Odustani',
         icon: 'close',
         role: 'cancel',
-        handler: () => {
-          console.log('Cancel clicked');
-        }
-      }]
+      }
+    ]
     });
     await actionSheet.present();
 
@@ -227,13 +224,22 @@ export class TicketsListPage implements OnInit, OnDestroy {
     console.log('onDidDismiss resolved with role', role);
   }
 
+  public callCustomer(phoneNum: string): void {
+    if(this.platform.is('android') || this.platform.is('ios')) {
+      this.callNumber.callNumber(phoneNum, true)
+        .then(res => console.log('Launched dialer!', res))
+        .catch(err => console.log('Error launching dialer', err));
+    } else {
+      this.presentToast('Ova opcija je dozvoljena za mobilne uređaje');
+    }
+
+  }
+
   public emailTicket(ticket: ITicket): void {
-    this.presentLoading('Karta se šalje na korisnikov email...')
+    this.presentLoading('Karta se šalje na korisnikov email...');
     this.ticketService.emailTicket(ticket).pipe(
       filter((data: boolean) => !!data),
-      tap(() => {
-        this.loadingController.dismiss();
-      }),
+      tap(() => this.loadingController.dismiss()),
       catchError((error: Error) => {
         this.loadingController.dismiss();
         return throwError(error);
@@ -242,20 +248,14 @@ export class TicketsListPage implements OnInit, OnDestroy {
     ).subscribe();
   }
 
-
   async createTicket() {
-    const modal = await this.modalController.create({
-      component: CreateTicketComponent,
-      cssClass: 'my-custom-class',
-    });
+    const modal = await this.modalController.create({component: CreateTicketComponent});
     return await modal.present();
   }
-
 
   async editTicket(ticket: ITicket) {
     const modal = await this.modalController.create({
       component: TicketEditComponent,
-      cssClass: 'my-custom-class',
       componentProps: {
         'ticketData': ticket,
       }
@@ -263,70 +263,78 @@ export class TicketsListPage implements OnInit, OnDestroy {
     return await modal.present();
   }
 
-
-  public getMenuOpened(): void {
-    from(this.menu.isOpen()).pipe(
-      tap((data: boolean) => {
-        console.log(data);
-        this.isMenuOpened = data;
-      }),
-      takeUntil(this.componentDestroyed$),
-    ).subscribe();
-  }
-
-  menuOpen(menu: string) {
-    this.isMenuOpened = true;
-    this.menu.open(menu);
-  }
-
-  menuClose(menu: string) {
-    this.isMenuOpened = false;
-    this.menu.close(menu);
-  }
-
-  openCustom() {
-    this.menu.enable(true, 'custom');
-    this.menu.open('custom');
-  }
-
   async presentLoading(msg: string) {
-    const loading = await this.loadingController.create({
-      cssClass: 'my-custom-class',
-      message: msg,
-    });
+    const loading = await this.loadingController.create({ message: msg });
     await loading.present();
-
-    const { role, data } = await loading.onDidDismiss();
-    console.log('Loading dismissed!');
   }
 
+  async presentToast(msg: string) {
+    const toast = await this.toastController.create({
+      message: msg,
+      duration: 3000,
+      color: 'primary',
+    });
+    await toast.present();
+  }
 
   public printTicket(ticket: ITicket): void {
     this.presentLoading('Štampanje karte u toku...');
     this.ticketService.printTicket(ticket).pipe(
+      take(1),
       tap((response: ArrayBuffer) => {
-        let file = new Blob([response], { type: 'application/pdf' });
-        var fileURL = URL.createObjectURL(file);
-        window.open(fileURL);
-        saveAs(file, 'karta-express-trans.pdf');
+        if (this.platform.is('android') || this.platform.is('ios')) {
+
+          try {
+            File.writeFile(
+              File.externalRootDirectory + "/Download",
+              `${ticket.ticketOnName}_express_trans.pdf`,
+              new Blob([response], { type: 'application/pdf' }),
+              {
+                replace: true,
+              }
+            )
+              .then(() => {
+                console.log("Saved external root directory");
+              })
+              .catch((error) => {
+                console.log(error);
+                console.log("Not saved");
+              });
+          } catch (err) {
+            throwError(err);
+          }
+
+          this.presentToast('Štampanje završeno.');
+
+        } else {
+          let file = new Blob([response], { type: 'application/pdf' });
+          var fileURL = URL.createObjectURL(file);
+          window.open(fileURL);
+          saveAs(file, 'karta-express-trans.pdf');
+        }
       }),
       tap(() => {
+        FileOpener.open(
+          File.externalRootDirectory + "/Downloads/" + 'karta-express-trans.pdf',
+          "application/pdf"
+        );
         this.loadingController.dismiss();
       }),
       catchError((error: Error) => {
         this.loadingController.dismiss();
         return throwError(error);
       }),
-      takeUntil(this.componentDestroyed$),
     ).subscribe();
   }
 
   public deleteTicket(ticket: ITicket): void {
     this.presentLoading(`Brisanje karte na ime "${ticket.ticketOnName}" u toku...`);
+
     this.ticketService.deleteTicket(ticket._id).pipe(
-      filter((data: ITicket) => !!data),
+      filter((data: ICommonResponse<any>) => !!data),
       tap(() => {
-        this.loadingController.dismiss();
+        this.tickets = [...this.tickets.filter((ticketToDelete: ITicket) => ticketToDelete._id !== ticket._id)];
+        this.loadingController.dismiss()
       }),
       catchError((error: Error) => {
         this.loadingController.dismiss();

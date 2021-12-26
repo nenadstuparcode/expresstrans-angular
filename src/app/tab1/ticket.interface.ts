@@ -8,6 +8,7 @@ export interface ICreateTicketPayload {
   ticketPhone: string;
   ticketRoundTrip: boolean;
   ticketStartDate: string;
+  ticketStartTime: string;
   ticketValid: number;
 }
 
@@ -21,6 +22,8 @@ export interface ICreateTicketResponse {
   ticketBusLineId: string;
   ticketRoundTrip: boolean;
   ticketStartDate: string;
+  ticketStartTime: string;
+  ticketId: string;
   createdAt: string;
   modifiedAt: string;
 }
@@ -35,6 +38,8 @@ export interface ITicket {
   ticketBusLineId: string;
   ticketRoundTrip: boolean;
   ticketStartDate: string;
+  ticketStartTime: string;
+  ticketId: string;
   createdAt: string;
   modifiedAt: string;
   busLineData?: IBusLine;

@@ -50,14 +50,14 @@
       <ion-item class="date-container">
         <mat-form-field appearance="legacy">
           <ion-label>Datum Polaska</ion-label>
-          <input matInput [min]="minDate" [matDatepickerFilter]="myFilter" formControlName="ticketStartDate" [matDatepicker]="picker" (dateChange)="selectDate($event)">
+          <input matInput [min]="minDate" [matDatepickerFilter]="myFilter" [disabled]="createTicketForm.controls.ticketBusLineId.invalid" formControlName="ticketStartDate" [matDatepicker]="picker" (dateChange)="selectDate($event)">
           <mat-datepicker #picker></mat-datepicker>
         </mat-form-field>
-        <ion-button class="select-date" color="primary" size="small" mat-raised-button (click)="picker.open()">Podesi</ion-button>
+        <ion-button [disabled]="createTicketForm.controls.ticketBusLineId.invalid" class="select-date" color="primary" size="small" mat-raised-button (click)="picker.open()">Podesi</ion-button>
       </ion-item>
 
-      <ion-item *ngIf="startTime">
-        <ion-label>Vrijeme polaska: {{ startTime | date: "HH:mm"}} </ion-label>
+      <ion-item>
+        <ion-label>Vrijeme polaska: {{ createTicketForm.controls.ticketStartTime.value | date: "HH:mm"}} </ion-label>
       </ion-item>
 
     </ion-list>

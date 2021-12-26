@@ -8,21 +8,42 @@
         <ion-col [formGroup]="searchBarForm" size-xs="12" size-md="6" offset-md="3">
           <ion-searchbar formControlName="searchTerm" placeholder="Pretraži"></ion-searchbar>
         </ion-col>
-        <ion-col size-md="6" offset-md="3">
+        <ion-col size-md="6" offset-md="3" *ngIf="tickets?.length">
           <ion-card *ngFor="let ticket of tickets" class="ticket">
             <ion-grid>
               <ion-row>
-                <ion-col size="2">
-                  <ion-icon size="large" color="primary" name="ticket-sharp"></ion-icon>
-                </ion-col>
-                <ion-col size="10">
-                  <ion-label class="ticket-item">{{ticket.ticketOnName}} - {{ ticket.ticketPhone }}</ion-label>
-                  <ion-label class="ticket-item">{{ticket.busLineData.lineCountryStart === 'bih' ? '(BIH)' : '(DE)'}} {{ ticket.busLineData.lineCityStart }} - {{ ticket.busLineData.lineCityEnd}}</ion-label>
-                  <ion-label class="ticket-item"><ion-icon class="ticket-payed-icon" color="success" name="checkmark-circle-sharp"> </ion-icon> Plaćenje pri polasku</ion-label>
+                <ion-col size="12">
+                  <ion-icon class="ticket-icon" size="large" color="primary" name="ticket-sharp"></ion-icon>
+                  <ion-label class="ticket-item"><ion-icon name="person-sharp"></ion-icon> {{ticket.ticketOnName}}</ion-label>
+                  <ion-label class="ticket-item-phone"><ion-icon name="call-sharp"></ion-icon> {{ ticket.ticketPhone }}</ion-label>
+                  <ion-label class="bus-line-title">
+                    <div class="bus-line-title-item">
+                      <p>{{ ticket.busLineData.lineCityStart }}</p>
+                      <small>{{ ticket.busLineData.lineCountryStart === 'bih' ? 'BIH' : 'DE'}}</small>
+                      <ion-avatar class="bus-line-country">
+                        <img [src]=" ticket.busLineData.lineCountryStart === 'bih' ? bihImage : deImage">
+                      </ion-avatar>
+                    </div>
+                    <div class="divider-container">
+                      <div class="lines">
+                        <ion-icon class="middle-icon" size="large" name="arrow-forward-circle-sharp"></ion-icon>
+                      </div>
+                    </div>
+                    <div class="bus-line-title-item">
+                      <p>{{ ticket.busLineData.lineCityEnd }}</p>
+                      <small>{{ ticket.busLineData.lineCountryStart !== 'bih' ? 'BIH' : 'DE'}}</small>
+                      <ion-avatar class="bus-line-country">
+                        <img [src]="ticket.busLineData.lineCountryStart !== 'bih' ? bihImage : deImage">
+                      </ion-avatar>
+                    </div>
+                  </ion-label>
+
+                  <ion-label class="ticket-payed"><ion-icon class="ticket-payed-icon" color="primary" name="checkmark-circle-sharp"> </ion-icon> Plaćenje pri polasku</ion-label>
+                  <ion-label *ngIf="ticket.ticketId" class="ticket-payed">Broj karte: {{ticket.ticketId}}</ion-label>
 
                   <div class="ticket-date">
                     <ion-icon size="small" name="time"></ion-icon>
-                    <ion-label> {{ticket.ticketStartDate | date }} ({{ ticket.busLineData.lineStartTime | date: "HH:mm" }})</ion-label>
+                    <ion-label> {{ticket.ticketStartDate | date }} ({{ ticket.ticketStartTime | date: "HH:mm" }})</ion-label>
                   </div>
 
                   <div class="ticket-edit">

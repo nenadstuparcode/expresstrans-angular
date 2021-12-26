@@ -1,8 +1,8 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
-import {FormBuilder, FormGroup, Validators} from '@angular/forms';
-import {filter, finalize, takeUntil, tap} from 'rxjs/operators';
+import {FormArray, FormBuilder, FormGroup, Validators} from '@angular/forms';
+import {filter, finalize, take, takeUntil} from 'rxjs/operators';
 import {Subject} from 'rxjs';
-import {LoadingController, PickerColumn, PickerColumnOption, PickerController, ToastController} from '@ionic/angular';
+import {LoadingController, PickerColumnOption, PickerController, ToastController} from '@ionic/angular';
 import {BusLineService} from "@app/tab2/bus-line.service";
 import {Router} from "@angular/router";
 
@@ -15,25 +15,16 @@ export class BusLineCreateComponent implements OnInit, OnDestroy {
 
   private componentDestroyed$: Subject<void> = new Subject<void>();
   public createBusLineForm: FormGroup;
+  public addStartDayForm: FormGroup;
 
-  public dayOneStartAt: PickerColumnOption[] = [
-    { text: 'Ponedeljak', value: 0},
-    { text: 'Utorak', value: 1},
-    { text: 'Srijeda', value: 2},
-    { text: 'Četvrtak', value: 3},
-    { text: 'Petak', value: 4},
-    { text: 'Subota', value: 5},
-    { text: 'Nedelja', value: 6},
-  ];
-
-  public dayTwoStartAt: PickerColumnOption[] = [
-    { text: 'Ponedeljak', value: 0},
-    { text: 'Utorak', value: 1},
-    { text: 'Srijeda', value: 2},
-    { text: 'Četvrtak', value: 3},
-    { text: 'Petak', value: 4},
-    { text: 'Subota', value: 5},
-    { text: 'Nedelja', value: 6},
+  public availableDays: PickerColumnOption[] = [
+    { text: 'Nedelja', value: 0},
+    { text: 'Ponedeljak', value: 1},
+    { text: 'Utorak', value: 2},
+    { text: 'Srijeda', value: 3},
+    { text: 'Četvrtak', value: 4},
+    { text: 'Petak', value: 5},
+    { text: 'Subota', value: 6},
   ];
 
   constructor(
@@ -46,6 +37,19 @@ export class BusLineCreateComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.createBusLineForm = this.createForm();
+    this.addStartDayForm = this.fb.group({
+      day: this.fb.control(null, Validators.required),
+      time: this.fb.control('', Validators.required),
+    });
+  }
+
+  public isDayIsUsed(selectedDay: number): boolean {
+    let usedDays: number[] = this.busLineDays.value.map((item: any) => item.day);
+    if(usedDays.some((day: number) => day === selectedDay)) {
+      return true;
+    }
+    return false;
+
   }
 
   public createForm(): FormGroup {
@@ -55,63 +59,33 @@ export class BusLineCreateComponent implements OnInit, OnDestroy {
       linePriceOneWay: this.fb.control('', Validators.required),
       linePriceRoundTrip: this.fb.control('', Validators.required),
       lineCountryStart: this.fb.control('bih', Validators.required),
-      lineStartDay1: this.fb.control('1', Validators.required),
-      lineStartDay2: this.fb.control('2', Validators.required),
-      lineStartTime: this.fb.control('2', Validators.required),
+      lineArray: this.fb.array([], Validators.required),
     });
   }
 
-  public getColumns(): PickerColumn[] {
-    const options1: PickerColumn = {
-      name: 'day1',
-      selectedIndex: this.createBusLineForm.controls['lineStartDay1'].value ? this.createBusLineForm.controls['lineStartDay1'].value : 0,
-      options: [...this.dayOneStartAt],
-    };
-
-    const options2: PickerColumn = {
-      name: 'day2',
-      selectedIndex: this.createBusLineForm.controls['lineStartDay2'].value ? this.createBusLineForm.controls['lineStartDay2'].value : 0,
-      options: [...this.dayTwoStartAt]
-    };
-
-    return [options1, options2];
+  public get busLineDays(): FormArray {
+    return <FormArray>this.createBusLineForm.controls['lineArray'];
   }
 
-  async openPicker() {
-    const picker = await this.pickerCtrl.create({
-      buttons: [
-        {
-          text: 'Odustani',
-          role: 'cancel',
-        },
-        {
-          text: 'Potvrdi',
-          handler: (value) => {
-            console.log(value);
-            this.createBusLineForm.controls['lineStartDay1'].setValue(value.day1.value);
-            this.createBusLineForm.controls['lineStartDay2'].setValue(value.day2.value);
-          },
-        },
-      ],
-      columns: this.getColumns(),
-    });
+  public addBusLineDay(): void {
+    const add = this.createBusLineForm.get('lineArray') as FormArray;
+    if(this.addStartDayForm.valid) {
+      add.push(this.fb.group(this.addStartDayForm.value));
+    }
 
-    await picker.present();
-
-    picker.onDidDismiss().then( async data => {
-      picker.columns.forEach((column) => {
-        column.options.forEach((el) => {
-          delete el.selected;
-          delete el.disabled;
-          delete el.transform;
-        })
-      })
-    })
+    this.addStartDayForm.reset();
+    this.presentToast('Polazak dodan.')
   }
 
-  async presentToast() {
+  public removeBusLineDay(index: number): void {
+    const remove = this.createBusLineForm.get('lineArray') as FormArray;
+    remove.removeAt(index);
+    this.presentToast('Polazak obrisan.')
+  }
+
+  async presentToast(msg: string) {
     const toast = await this.toastCtrl.create({
-      message: 'Linija uspjesno kreirana.',
+      message: msg,
       duration: 2000
     });
     toast.present();
@@ -121,10 +95,12 @@ export class BusLineCreateComponent implements OnInit, OnDestroy {
     this.handleButtonClick();
 
     this.busLineService.createBusLine(this.createBusLineForm.value).pipe(
+      take(1),
       filter((data) => !!data && this.createBusLineForm.valid),
       finalize(() => {
         this.loadingCtrl.dismiss();
-        this.presentToast();
+        this.createBusLineForm.reset();
+        this.presentToast('Linija uspjesno kreirana.');
         this.router.navigate(['/konfiguracija/linije']);
       }),
       takeUntil(this.componentDestroyed$),

@@ -12,12 +12,10 @@ import {NgbDatepickerModule, NgbDropdownModule} from '@ng-bootstrap/ng-bootstrap
 import {CreateTicketComponent} from '@app/tab1/components/create-ticket/create-ticket.component';
 import {MatDatepickerModule} from '@angular/material/datepicker';
 import {MatFormFieldModule} from '@angular/material/form-field';
-import {DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE, MatNativeDateModule} from '@angular/material/core';
+import {MAT_DATE_FORMATS, MatNativeDateModule} from '@angular/material/core';
 import { MatInputModule } from '@angular/material/input';
-import {HTTP_INTERCEPTORS} from "@angular/common/http";
-import {ErrorInterceptor} from "@app/services/error.interceptor";
 import {TicketEditComponent} from "@app/tab1/components/ticket-edit/ticket-edit.component";
-
+import {CallNumber} from "@awesome-cordova-plugins/call-number/ngx";
 
 export const MY_FORMATS = {
   parse: {
@@ -52,6 +50,7 @@ export const MY_FORMATS = {
   providers: [
     MatDatepickerModule,
     {provide: MAT_DATE_FORMATS, useValue: MY_FORMATS},
+    CallNumber,
   ]
 })
 export class Tab1PageModule {}

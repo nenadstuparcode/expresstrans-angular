@@ -22,26 +22,23 @@ import {TicketService} from "@app/tab1/ticket.service";
   styleUrls: ['./create-ticket.component.scss'],
 
 })
-export class CreateTicketComponent implements OnInit, AfterViewInit, OnDestroy {
+export class CreateTicketComponent implements OnInit, OnDestroy {
   @ViewChild(MatDatepicker) datepicker: MatDatepicker<Date>;
   public createTicketForm: FormGroup;
 
   public componentDestroyed$: Subject<void> = new Subject<void>();
-  public startInGermany: boolean = false;
-  public phoneNumber: string = '';
-  public email: string = '';
   public minDate: Date;
   public columnOptions: PickerColumnOption[] = [];
   public pickedOption: any;
-  public dayOneStart: number = 0;
-  public dayTwoStart: number = 0;
   public startTime: string = '';
+  public availableDays: number[] = [];
+  public daysForLine: any[] = [];
 
 
   myFilter = (d: Date): boolean => {
     const day = (d || new Date()).getDay();
     console.log(day);
-    const blockedDates = [this.dayOneStart, this.dayTwoStart];
+    const blockedDates = [...this.availableDays];
     console.log(blockedDates);
     return (blockedDates.includes(day));
   }
@@ -83,6 +80,7 @@ export class CreateTicketComponent implements OnInit, AfterViewInit, OnDestroy {
           ticketBusLineId: this.fb.control('', Validators.required),
           ticketRoundTrip: this.fb.control(false, Validators.required),
           ticketStartDate: this.fb.control('', Validators.required),
+          ticketStartTime: this.fb.control('', Validators.required),
         });
 
         this.createTicketForm.valueChanges.pipe(
@@ -94,10 +92,6 @@ export class CreateTicketComponent implements OnInit, AfterViewInit, OnDestroy {
         ).subscribe();
       }),
     ).subscribe();
-  }
-
-  ngAfterViewInit(): void {
-
   }
 
   dismissModal() {
@@ -150,26 +144,28 @@ export class CreateTicketComponent implements OnInit, AfterViewInit, OnDestroy {
     console.log(event.value);
     console.log(this.createTicketForm.controls['ticketStartDate']);
 
-    // if(event) {
-    //   this.createTicketForm.controls['ticketStartDate'].setValue(event.value.toString());
-    // }
+    console.log(event.value.getDay());
+    console.log(this.daysForLine);
+    this.createTicketForm.controls.ticketStartTime.setValue(this.daysForLine.find((item: any) => item.day == event.value.getDay()).time);
   }
 
   public handleBusLine(selectedLine: any): void {
 
-    this.dayOneStart = selectedLine.linija.value.lineStartDay1;
-    this.dayTwoStart = selectedLine.linija.value.lineStartDay2;
-    this.startTime = selectedLine.linija.value.lineStartTime;
+
     this.datepicker.disabled = true;
     this.datepicker.disabled = false;
     this.datepicker._getDateFilter();
 
-
     this.pickedOption = selectedLine;
+
+
+    this.availableDays = selectedLine.linija.value.lineArray.map((line: any) =>  line.day);
+    this.daysForLine = selectedLine.linija.value.lineArray;
 
     // reset datepicker to invalid days
     this.createTicketForm.controls['ticketBusLineId'].setValue(selectedLine.linija.value._id);
     this.createTicketForm.controls['ticketStartDate'].setValue('');
+    this.createTicketForm.controls['ticketStartTime'].setValue('');
   }
 
   async handleButtonClick() {

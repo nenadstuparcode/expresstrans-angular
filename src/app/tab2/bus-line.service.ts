@@ -26,7 +26,6 @@ export class BusLineService {
   public getBusLines(): Observable<IBusLine[]> {
     return this.http.get(`${environment.apiUrl}/busLine`).pipe(
       filter((data: ICommonResponse<IBusLine[]>) => !!data),
-      tap((data: ICommonResponse<IBusLine[]>) => console.log(data.data)),
       pluck('data'),
       catchError((error: Error) => {
         return throwError(error);
@@ -37,21 +36,18 @@ export class BusLineService {
   public getBusLine(id: string): Observable<ICommonResponse<IBusLine>> {
     return this.http.get(`${environment.apiUrl}/busLine/${id}`).pipe(
       filter((data: ICommonResponse<IBusLine>) => !!data),
-      tap((data: ICommonResponse<IBusLine>) => console.log(data.data)),
     );
   }
 
   public updateBusLine(payload: ICreateBusLinePayload, id: string): Observable<ICommonResponse<IBusLine>> {
     return this.http.put(`${environment.apiUrl}/busLine/${id}`, payload).pipe(
       filter((data: ICommonResponse<IBusLine>) => !!data),
-      tap((data: ICommonResponse<IBusLine>) => console.log(data.data)),
     );
   }
 
   public deleteBusLine(id: string): Observable<IBusLine> {
     return this.http.delete(`${environment.apiUrl}/busLine/${id}`).pipe(
       filter((data: ICommonResponse<IBusLine>) => !!data),
-      tap((data: ICommonResponse<IBusLine>) => console.log(data.data)),
       pluck('data'),
     );
   }

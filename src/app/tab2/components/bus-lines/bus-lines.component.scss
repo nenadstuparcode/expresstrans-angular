@@ -1,35 +1,73 @@
 .bus-line {
   padding:0px;
+  &-container {
+    background: #e8e8e8;
+  }
   &-title {
+    padding-top:30px;
     display: flex;
-    justify-content: flex-start;
+    justify-content: space-evenly;
     align-items: center;
     font-weight: bold;
     font-size: 18px;
+    &-item {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      max-width: 30%;
+      min-width: 30%;
+      & p {
+        line-height: 1;
+        text-align: center;
+        word-break: break-all;
+      }
+    }
   }
   &-edit {
     position: absolute;
     right:5px;
-    top:5px;
+    top:0px;
   }
   &-price {
-    display: flex;
-    align-items: center;
-    font-weight: bold;
+    &-container {
+      justify-content: space-evenly;
+      display: flex;
+      align-items: baseline;
+    }
+    position: relative;
+    display: inline-flex;
+    justify-content: center;
+    align-items: baseline;
+    &-amount {
+      font-size: 22px;
+      margin-left: 4px;
+    }
+    &-icon {
+      width: 15px;
+      height: 14px;
+    }
   }
   &-days {
+    margin-top: 10px;
     display: flex;
+    justify-content: center;
     align-items: center;
-    font-weight: bold;
+    flex-wrap: wrap;
+    & ion-badge {
+      margin-right: 5px;
+      margin-bottom: 5px;
+      padding:4px 5px;
+      border-radius: 3px;
+      background: transparent;
+      border: 1px solid #444;
+      color: #444;
+    }
   }
 
   &-country {
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
-    bottom: 10px;
-    width: 40px;
-    height: 40px;
+    width: 30px;
+    height: 30px;
     border-radius: 5px;
     overflow: hidden;
   }
@@ -67,3 +105,34 @@
   text-align: center;
 }
 
+.divider-container {
+  padding: 10px;
+  & .lines {
+    position: relative;
+    height: 10px;
+    width: 100px;
+
+    & .middle-icon {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+    }
+    &::after , &::before {
+      content: '';
+      position: absolute;
+      margin: auto;
+      height: 2px;
+      background: #666;
+      width: 40%;
+      top: 45%;
+    }
+    &::after {
+      left: 0;
+
+    }
+    &::before {
+      right: 0;
+    }
+  }
+}

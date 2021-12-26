@@ -41,11 +41,9 @@
         </ion-text>
       </ion-item>
 
-      <ion-item>
-        <ion-label>Polazak iz države</ion-label>
-      </ion-item>
+      <ion-list-header>Država polaska:</ion-list-header>
 
-      <ion-item>
+      <ion-item lines="none">
         <ion-segment color="primary" formControlName="lineCountryStart">
           <ion-segment-button color="primary" value="bih">
             <ion-label>BiH</ion-label>
@@ -56,15 +54,48 @@
         </ion-segment>
       </ion-item>
 
-      <ion-item>
-        <ion-label position="standard">Dani polaska: {{ dayOneStartAt[createBusLineForm.controls.lineStartDay1.value].text }}, {{ dayOneStartAt[createBusLineForm.controls.lineStartDay2.value].text }}</ion-label>
-        <ion-button slot="end" size="small" color="primary" (click)="openPicker()">Odaberi</ion-button>
+      <ion-list-header>Polasci:</ion-list-header>
+
+      <ion-item lines="none" *ngFor="let startDay of busLineDays.value; index as index">
+        <ion-label>{{availableDays[startDay.day].text}} ({{startDay.time | date:"HH:mm"}})</ion-label>
+        <ion-icon (click)="removeBusLineDay(index)" color="primary" slot="end" name="close"></ion-icon>
       </ion-item>
 
-      <ion-item>
-        <ion-label slot="start">Vrijeme polaska</ion-label>
-        <ion-datetime formControlName="lineStartTime" slot="end" display-format="HH:mm" minuteValues="0, 05 10, 15, 20, 25, 30, 35, 40, 45, 50, 55" picker-format="HH:mm" value="2021-02-19T07:43Z"></ion-datetime>
+      <ion-item lines="none" *ngIf="!busLineDays?.length">
+        <ion-label>Nema dodanih polazaka.</ion-label>
       </ion-item>
+
+      <ion-list-header>Dodaj polazak:</ion-list-header>
+
+      <ng-container [formGroup]="addStartDayForm">
+        <!--ADD DAY-->
+        <ion-item lines="none">
+          <ion-label position="stacked">Dan </ion-label>
+          <ion-select formControlName="day" okText="Potvrdi" cancelText="Odustani" placeholder="Izaberi dan">
+            <ng-container *ngFor="let day of availableDays">
+              <ion-select-option *ngIf="!isDayIsUsed(day.value)"  [value]="day.value"> {{ day.text }}</ion-select-option>
+            </ng-container>
+
+          </ion-select>
+        </ion-item>
+        <!--ADD TIME-->
+        <ion-item lines="none">
+          <ion-label position="stacked">Vrijeme polaska</ion-label>
+          <ion-datetime placeholder="Unesi vrijeme polaska" formControlName="time" display-format="HH:mm" minuteValues="0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55" picker-format="HH:mm" value="2021-02-19T07:00Z"></ion-datetime>
+        </ion-item>
+        <!--SUBMIT BUS LINE START-->
+        <ion-item lines="none">
+          <ion-button
+            [disabled]="!addStartDayForm.valid"
+            slot="end"
+            size="medium"
+            color="primary"
+            (click)="addBusLineDay()">
+            <ion-icon color="light" name="add-outline"></ion-icon>
+            Dodaj polazak
+          </ion-button>
+        </ion-item>
+      </ng-container>
 
     </ion-list>
   </form>

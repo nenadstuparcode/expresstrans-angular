@@ -1,19 +1,44 @@
 .ticket-list {
   background: #e8e8e8;
+  min-height: 100vh;
   & .ticket {
     overflow: visible;
     margin: 20px 5px;
+    &-icon {
+      position: absolute;
+      top:5px;
+      left:5px;
+    }
     &-item {
-      position: relative;
+      text-align: center;
+      padding-top:20px;
       display: flex;
-      justify-content: flex-start;
+      justify-content: center;
+      font-size: 20px;
       align-items: center;
-      font-weight: bold;
+      line-height: 1;
+      &-phone {
+        margin-top: 10px;
+        font-size: 15px;
+        font-weight: bold;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        line-height: 1;
+        font-stretch: ultra-expanded;
+      }
     }
-    &-payed-icon {
-      height: 20px;
-      width: 20px;
+    &-payed {
+
+      display: flex;
+      justify-content: center;
+      margin-bottom: 15px;
+      &-icon {
+        height: 20px;
+        width: 20px;
+      }
     }
+
     &-edit {
       position: absolute;
       right: 7.5px;
@@ -28,7 +53,7 @@
       right: -5px;
       display: flex;
       align-items: center;
-      background: #b682b0;
+      background: var(--ion-color-primary, #3880ff);
       color: white;
       padding: 3px;
       border-radius: 4px;
@@ -41,4 +66,71 @@
   position: absolute;
   bottom:15px;
   right: 30px;
+}
+
+.no-results {
+  position: absolute;
+  left: 50%;
+  top:50%;
+  transform: translate(-50%, -50%);
+  padding: 50px;
+}
+.bus-line-country {
+  width: 30px;
+  height: 30px;
+  border-radius: 5px;
+  overflow: visible;
+}
+.bus-line-title {
+  padding-top:10px;
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+  font-weight: bold;
+  font-size: 18px;
+  &-item {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    max-width: 30%;
+    min-width: 30%;
+    & p {
+      line-height: 1;
+      text-align: center;
+      word-break: break-all;
+    }
+  }
+}
+
+.divider-container {
+  padding: 10px;
+  & .lines {
+    position: relative;
+    height: 10px;
+    width: 100px;
+
+    & .middle-icon {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+    }
+    &::after , &::before {
+      content: '';
+      position: absolute;
+      margin: auto;
+      height: 2px;
+      background: #666;
+      width: 40%;
+      top: 45%;
+    }
+    &::after {
+      left: 0;
+
+    }
+    &::before {
+      right: 0;
+    }
+  }
 }

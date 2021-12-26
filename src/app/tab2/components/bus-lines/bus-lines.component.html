@@ -10,38 +10,62 @@
   <ion-refresher (ionRefresh)="getBusLines(searchTermValue, 10, $event)" slot="fixed" pullFactor="0.5" pullMin="100" pullMax="200">
     <ion-refresher-content></ion-refresher-content>
   </ion-refresher>
-  <ion-grid>
+  <ion-grid class="bus-line-container">
     <ion-row>
       <ion-col [formGroup]="searchBarForm" size-xs="12" size-md="6" offset-md="3">
         <ion-searchbar formControlName="searchTerm" placeholder="Pretraži" (ionClear)="getBusLines('', 10)"></ion-searchbar>
       </ion-col>
       <ion-col size-md="6" offset-md="3">
-        <ion-list *ngIf="busLines.length; else noBusLinesTemplate">
+        <ng-container *ngIf="busLines.length; else noBusLinesTemplate">
           <ion-card class="bus-line" *ngFor="let line of busLines">
             <ion-grid>
               <ion-row>
-                <ion-col size="2">
-                  <ion-icon class="bus-line-icon" color="primary" size="large" name="repeat-sharp"></ion-icon>
-                  <ion-avatar class="bus-line-country">
-                    <img [src]=" line.lineCountryStart === 'bih' ? bihImage : deImage">
-                  </ion-avatar>
-                </ion-col>
-                <ion-col size="10">
-                  <ion-label class="bus-line-title">{{ line.lineCityStart }} <ion-icon name="arrow-forward-sharp"></ion-icon> {{ line.lineCityEnd }}</ion-label>
+                <ion-col size="12">
+
+                  <!-- BUS LINE DETAILS -->
+                  <ion-label class="bus-line-title">
+                    <div class="bus-line-title-item">
+                      <p>{{ line.lineCityStart }}</p>
+                      <small>{{ line.lineCountryStart === 'bih' ? 'BIH' : 'DE'}}</small>
+                      <ion-avatar class="bus-line-country">
+                        <img [src]=" line.lineCountryStart === 'bih' ? bihImage : deImage">
+                      </ion-avatar>
+                    </div>
+                    <div class="divider-container">
+                      <div class="lines">
+                        <ion-icon class="middle-icon" size="large" name="arrow-forward-circle-sharp"></ion-icon>
+                      </div>
+                    </div>
+                    <div class="bus-line-title-item">
+                      <p>{{ line.lineCityEnd }}</p>
+                      <small>{{ line.lineCountryStart !== 'bih' ? 'BIH' : 'DE'}}</small>
+                      <ion-avatar class="bus-line-country">
+                        <img [src]="line.lineCountryStart !== 'bih' ? bihImage : deImage">
+                      </ion-avatar>
+                    </div>
+                  </ion-label>
+
+                  <!-- BUS LINE START DAYS -->
+                  <div class="bus-line-days">
+                    <ion-badge *ngFor="let start of line.lineArray" size="large">{{availableDays[start.day].text}} ({{start.time | date: "HH:mm"}})</ion-badge>
+                  </div>
+
+                  <!-- BUS LINE PRICES -->
+                  <div class="bus-line-price-container">
+                    <ion-label class="bus-line-price">Jedan smjer:<span class="bus-line-price-amount">{{line.linePriceOneWay}}</span><ion-icon class="bus-line-price-icon" name="logo-euro"></ion-icon></ion-label>
+                    <span>|</span>
+                    <ion-label class="bus-line-price">Povratna:<span class="bus-line-price-amount">{{line.linePriceRoundTrip}}</span><ion-icon class="bus-line-price-icon" name="logo-euro"></ion-icon></ion-label>
+                  </div>
+
+                  <!-- BUS LINE EDIT TRIGGER -->
                   <ion-icon class="bus-line-edit" (click)="presentActionSheet(line._id)" size="large" name="ellipsis-horizontal-sharp"></ion-icon>
-                  <ion-label class="bus-line-price">Cijena: {{line.linePriceOneWay}} <ion-icon name="logo-euro"></ion-icon></ion-label>
-                  <ion-label class="bus-line-price">Povratna: {{line.linePriceRoundTrip}} <ion-icon name="logo-euro"></ion-icon></ion-label>
-                  <ion-label class="bus-line-days">Dani: {{optionsStart[line.lineStartDay1].text}}, {{optionsStart[line.lineStartDay2].text}}</ion-label>
-                  <ion-text class="bus-line-time">
-                    <ion-icon name="time-sharp"></ion-icon>
-                    <ion-label>{{line.lineStartTime | date:"HH:mm" }}</ion-label>
-                  </ion-text>
+
                 </ion-col>
               </ion-row>
             </ion-grid>
 
           </ion-card>
-        </ion-list>
+        </ng-container>
       </ion-col>
     </ion-row>
   </ion-grid>

@@ -3,10 +3,8 @@ export interface ICreateBusLinePayload {
   lineCityEnd: string;
   linePriceOneWay: number;
   linePriceRoundTrip: number;
-  lineStartTime: string;
   lineCountryStart: CountryStart;
-  lineStartDay1: 0 | 1 | 2 | 3 | 4 | 5 | 6;
-  lineStartDay2: 0 | 1 | 2 | 3 | 4 | 5 | 6;
+  lineArray: any[];
   busLineNr: number;
 }
 
@@ -16,12 +14,10 @@ export interface ICreateBusLineResponse {
   id: string;
   lineCityEnd: string;
   lineCityStart: string;
-  lineStartTime: string;
   lineCountryStart: CountryStart;
   linePriceOneWay: number;
   linePriceRoundTrip: number;
-  lineStartDay1: 0 | 1 | 2 | 3 | 4 | 5 | 6;
-  lineStartDay2: 0 | 1 | 2 | 3 | 4 | 5 | 6;
+  lineArray: any[];
 }
 
 export interface IBusLine {
@@ -30,10 +26,8 @@ export interface IBusLine {
   lineCityEnd: string;
   linePriceOneWay: number;
   linePriceRoundTrip: number;
-  lineStartTime: string;
   lineCountryStart: CountryStart;
-  lineStartDay1: 0 | 1 | 2 | 3 | 4 | 5 | 6;
-  lineStartDay2: 0 | 1 | 2 | 3 | 4 | 5 | 6;
+  lineArray: any[];
   createdAt: string;
   modifiedAt: string;
 }
