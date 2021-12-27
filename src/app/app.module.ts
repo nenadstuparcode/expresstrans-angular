@@ -17,7 +17,9 @@ import {ErrorInterceptor} from "@app/services/error.interceptor";
   entryComponents: [],
   imports: [
     BrowserModule,
-    IonicModule.forRoot(),
+    IonicModule.forRoot({
+      mode: 'md',
+    }),
     AppRoutingModule,
     BrowserModule,
     BrowserAnimationsModule,

@@ -109,20 +109,18 @@ export class TicketsListPage implements OnInit, OnDestroy {
         })
       }),
       tap((data: ITicket[]) => {
-        this.tickets = data;
+        this.tickets = [...data];
 
-        if(event) {
-          event.target.complete();
-        }
+        if(event) { event.target.complete() }
 
         this.loadingController.dismiss();
       }),
-      catchError((err: any) => {
+      catchError((err: Error) => {
         if(event) { event.target.complete() }
 
         this.loadingController.dismiss();
 
-        return err;
+        return throwError(err);
       }),
       takeUntil(this.componentDestroyed$),
     ).subscribe();
