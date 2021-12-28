@@ -12,7 +12,7 @@ import {
   concatMap,
   debounceTime,
   distinctUntilChanged,
-  filter,
+  filter, finalize,
   map,
   take,
   takeUntil,
@@ -90,40 +90,42 @@ export class TicketsListPage implements OnInit, OnDestroy {
   public getTickets(searchTerm: string, searchLimit: number, event?: any): void {
     console.log('get tickets');
 
-    this.presentLoading('Učitavanje karti...')
-    this.busLineService.getBusLines().pipe(
-      filter((data: IBusLine[]) => !!data),
-      tap((data: IBusLine[]) => this.busLines = data),
-      concatMap(() => this.ticketService.searchTickets({ searchTerm: searchTerm,searchLimit: searchLimit})),
-      filter((data: ICommonResponse<ITicket[]>) => !!data),
-      map((data: ICommonResponse<ITicket[]>) => {
-        this.ticketsCount = data.count;
-        this.searchLimit = searchLimit;
-        this.searchTermValue = searchTerm;
+    this.presentLoading('Učitavanje karti...').then(() => {
+      this.busLineService.getBusLines().pipe(
+        filter((data: IBusLine[]) => !!data),
+        tap((data: IBusLine[]) => this.busLines = data),
+        concatMap(() => this.ticketService.searchTickets({ searchTerm: searchTerm,searchLimit: searchLimit})),
+        filter((data: ICommonResponse<ITicket[]>) => !!data),
+        map((data: ICommonResponse<ITicket[]>) => {
+          this.ticketsCount = data.count;
+          this.searchLimit = searchLimit;
+          this.searchTermValue = searchTerm;
 
-        return data.data.map((ticket: ITicket) => {
-          return {
-            ...ticket,
-            busLineData: this.getBusLineData(ticket.ticketBusLineId),
-          }
-        })
-      }),
-      tap((data: ITicket[]) => {
-        this.tickets = [...data];
+          return data.data.map((ticket: ITicket) => {
+            return {
+              ...ticket,
+              busLineData: this.getBusLineData(ticket.ticketBusLineId),
+            }
+          })
+        }),
+        tap((data: ITicket[]) => {
+          this.tickets = [...data];
 
-        if(event) { event.target.complete() }
+          if(event) { event.target.complete() }
 
-        this.loadingController.dismiss();
-      }),
-      catchError((err: Error) => {
-        if(event) { event.target.complete() }
+          this.loadingController.dismiss();
+        }),
+        catchError((err: Error) => {
+          if(event) { event.target.complete() }
 
-        this.loadingController.dismiss();
+          this.loadingController.dismiss();
 
-        return throwError(err);
-      }),
-      takeUntil(this.componentDestroyed$),
-    ).subscribe();
+          return throwError(err);
+        }),
+        takeUntil(this.componentDestroyed$),
+      ).subscribe();
+    });
+
   }
 
   public getMoreTickets(): void {

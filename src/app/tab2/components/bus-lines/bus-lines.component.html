@@ -16,7 +16,7 @@
         <ion-searchbar formControlName="searchTerm" placeholder="Pretraži" (ionClear)="getBusLines('', 10)"></ion-searchbar>
       </ion-col>
       <ion-col size-md="6" offset-md="3">
-        <ng-container *ngIf="busLines.length; else noBusLinesTemplate">
+        <ng-container *ngIf="busLines.length">
           <ion-card class="bus-line" *ngFor="let line of busLines">
             <ion-grid>
               <ion-row>
@@ -75,9 +75,6 @@
       loadingText="Učitavanje rezultata...">
     </ion-infinite-scroll-content>
   </ion-infinite-scroll>
-  <ng-template #noBusLinesTemplate>
-    <ion-label color="primary" class="no-lines-template" size="large">Nema sačuvanih linija. Klikom na <ion-icon name="add-circle-outline"></ion-icon> dodajte novu.</ion-label>
-  </ng-template>
   <ion-fab class="add-icon" vertical="end" horizontal="end" slot="fixed">
     <ion-fab-button (click)="createLine()">
       <ion-icon color="light" size="large" name="add-sharp"></ion-icon>

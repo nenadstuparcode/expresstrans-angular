@@ -4,11 +4,15 @@
   </ion-toolbar>
 </ion-header>
 <ion-content fullscreen>
-  <ion-list>
-    <ion-item *ngFor="let tech of techs" (click)="showDetail(tech.title)">
-      <ion-icon slot="start" [name]="tech.icon"></ion-icon>
-      <ion-label>{{tech.title}}</ion-label>
-      <ion-icon slot="end" name="arrow-forward-sharp"></ion-icon>
-    </ion-item>
-  </ion-list>
+  <ion-row>
+    <ion-col size-md="6" offset-md="3">
+      <ion-list>
+        <ion-item *ngFor="let tech of techs" (click)="showDetail(tech.title)">
+          <ion-icon slot="start" [name]="tech.icon"></ion-icon>
+          <ion-label>{{tech.title}}</ion-label>
+          <ion-icon slot="end" name="arrow-forward-sharp"></ion-icon>
+        </ion-item>
+      </ion-list>
+    </ion-col>
+  </ion-row>
 </ion-content>
