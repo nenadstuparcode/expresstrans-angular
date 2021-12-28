@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import {BehaviorSubject, EMPTY, Observable} from 'rxjs';
 import {ICommonResponse, IUser, IUserLoginResponse, IUserRegister} from '@app/services/user.interface';
 import {Router} from '@angular/router';
 import {HttpClient} from '@angular/common/http';
@@ -13,24 +13,18 @@ export class UserServiceService {
 
   private userSubject: BehaviorSubject<IUser>;
   public user: Observable<IUser>;
-  public payload: any = {
-    lineCityStart: 'Doboj',
-    lineCityEnd: 'Minhen',
-    linePriceOneWay: 60,
-    linePriceRoundTrip: 100,
-    lineCountryStart: 'bih',
-    lineStartDay1: '1',
-    lineStartDay2: '3',
-    busLineNr: 888558
-  };
+  public isLoggedIn$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+
   constructor(
     private router: Router,
     private http: HttpClient,
   ) {
     this.userSubject = new BehaviorSubject<IUser>(JSON.parse(localStorage.getItem('user')));
     this.user = this.userSubject.asObservable();
+    if(!!JSON.parse(localStorage.getItem('user'))) {
+      this.isLoggedIn$.next(true);
+    }
   }
-
 
   public getUser(): IUser {
     return this.userSubject.value;
@@ -45,16 +39,17 @@ export class UserServiceService {
         return data.data;
       }),
       finalize(() => {
-        console.log(this.getUser());
-        console.log('navigating from login page to tyre-list');
-        this.router.navigate(['/']);
+        this.isLoggedIn$.next(true);
+        this.router.navigate(['/'])
       })
     );
   }
 
   public logout(): void {
+    this.isLoggedIn$.next(false);
     localStorage.removeItem('user');
     this.userSubject.next(null);
+    this.user = EMPTY;
     this.router.navigate(['/login']);
   }
 

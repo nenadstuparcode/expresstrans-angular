@@ -3,7 +3,7 @@ import {Router} from '@angular/router';
 import {HttpClient} from '@angular/common/http';
 import {Observable, throwError} from 'rxjs';
 import {ICommonResponse} from '@app/services/user.interface';
-import {catchError, filter, pluck, tap} from 'rxjs/operators';
+import {catchError, filter, pluck} from 'rxjs/operators';
 import {IBusLine, ICreateBusLinePayload, ICreateBusLineResponse} from '@app/tab2/tab2.interface';
 import { environment } from "@env/environment";
 
@@ -19,7 +19,6 @@ export class BusLineService {
   public createBusLine(payload: ICreateBusLinePayload): Observable<ICommonResponse<ICreateBusLineResponse>> {
     return this.http.post(`${environment.apiUrl}/busLine`, payload).pipe(
       filter((data: ICommonResponse<ICreateBusLineResponse>) => !!data),
-      tap((data: ICommonResponse<ICreateBusLineResponse>) => console.log(data.data)),
     );
   }
 
@@ -55,7 +54,6 @@ export class BusLineService {
   public searchBusLines(payload : {searchTerm: string, searchLimit: number}): Observable<ICommonResponse<IBusLine[]>> {
     return this.http.post(`${environment.apiUrl}/busLine/search`, payload ).pipe(
       filter((data: ICommonResponse<IBusLine[]>) => !!data),
-      tap((data: ICommonResponse<IBusLine[]>) => console.log(data.data)),
     )
   }
 

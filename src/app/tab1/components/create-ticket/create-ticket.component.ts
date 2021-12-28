@@ -8,13 +8,15 @@ import {
   ToastController
 } from '@ionic/angular';
 import {BusLineService} from "@app/tab2/bus-line.service";
-import {filter, finalize, map, takeUntil, tap} from "rxjs/operators";
+import {filter, map, takeUntil, tap} from "rxjs/operators";
 import {Subject} from "rxjs";
 import {IBusLine} from "@app/tab2/tab2.interface";
 import {MatDatepicker} from "@angular/material/datepicker";
 import {FormBuilder, FormGroup, Validators} from "@angular/forms";
 import {DateAdapter} from "@angular/material/core";
 import {TicketService} from "@app/tab1/ticket.service";
+import {ICommonResponse} from "@app/services/user.interface";
+import {ICreateTicketResponse} from "@app/tab1/ticket.interface";
 
 @Component({
   selector: 'app-create-ticket',
@@ -200,10 +202,10 @@ export class CreateTicketComponent implements OnInit, OnDestroy {
     if(this.createTicketForm.valid) {
       this.presentLoading('Kreiranje karte...');
       this.ticketService.createTicket(this.createTicketForm.value).pipe(
-        finalize(() => {
+        tap((res:ICommonResponse<ICreateTicketResponse>) => {
           this.loadingCtrl.dismiss();
           this.presentToast();
-          this.dismissModal();
+          this.modalController.dismiss(res.data);
         }),
         takeUntil(this.componentDestroyed$),
       ).subscribe();

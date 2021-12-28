@@ -3,8 +3,6 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import { Tab1Page } from './tab1.page';
-import { ExploreContainerComponentModule } from '../explore-container/explore-container.module';
-
 import { Tab1PageRoutingModule } from './tab1-routing.module';
 import {TicketsListPage} from '@app/tab1/components/tickets-list/tickets-list.page';
 import {Tab2PageModule} from '@app/tab2/tab2.module';
@@ -34,7 +32,6 @@ export const MY_FORMATS = {
         IonicModule,
         CommonModule,
         FormsModule,
-        ExploreContainerComponentModule,
         Tab1PageRoutingModule,
         Tab2PageModule,
         NgbDropdownModule,

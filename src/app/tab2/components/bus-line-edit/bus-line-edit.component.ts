@@ -1,10 +1,16 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import {Component, Input, OnDestroy, OnInit} from '@angular/core';
 import {Subject} from "rxjs";
 import {FormArray, FormBuilder, FormGroup, Validators} from "@angular/forms";
-import {LoadingController, PickerColumn, PickerColumnOption, PickerController, ToastController} from "@ionic/angular";
+import {
+  LoadingController,
+  ModalController,
+  PickerColumnOption,
+  PickerController,
+  ToastController
+} from "@ionic/angular";
 import {BusLineService} from "@app/tab2/bus-line.service";
-import {concatMap, filter, finalize, map, take, takeUntil, tap} from "rxjs/operators";
-import {ActivatedRoute, Params, Router} from "@angular/router";
+import {filter, take, takeUntil, tap} from "rxjs/operators";
+import {ActivatedRoute} from "@angular/router";
 import {ICommonResponse} from "@app/services/user.interface";
 import {IBusLine} from "@app/tab2/tab2.interface";
 
@@ -14,7 +20,7 @@ import {IBusLine} from "@app/tab2/tab2.interface";
   styleUrls: ['./bus-line-edit.component.scss'],
 })
 export class BusLineEditComponent implements OnInit, OnDestroy {
-  public busLine: IBusLine;
+  @Input() public busLine: IBusLine;
   private componentDestroyed$: Subject<void> = new Subject<void>();
   public updateBusLineForm: FormGroup;
   public busLineId: string;
@@ -38,23 +44,14 @@ export class BusLineEditComponent implements OnInit, OnDestroy {
     private busLineService: BusLineService,
     private loadingCtrl: LoadingController,
     private toastCtrl: ToastController,
-    private router: Router) { }
+    private modalCtrl: ModalController) { }
 
   public ngOnInit(): void {
-    this.activatedRoute.params.pipe(
-      filter((data: Params) => !!data),
-      tap((data:Params) => this.busLineId = data.id),
-      concatMap(() => this.busLineService.getBusLine(this.busLineId)),
-      tap((data:any) => console.log(data)),
-      tap((data: ICommonResponse<IBusLine>) => {
-        this.updateBusLineForm = this.initiateUpdateForm(data.data);
-        this.addStartDayForm = this.fb.group({
-          day: this.fb.control(null, Validators.required),
-          time: this.fb.control('', Validators.required),
-        });
-      }),
-      takeUntil(this.componentDestroyed$),
-    ).subscribe();
+    this.updateBusLineForm = this.initiateUpdateForm(this.busLine);
+    this.addStartDayForm = this.fb.group({
+      day: this.fb.control(null, Validators.required),
+      time: this.fb.control('', Validators.required),
+    });
   }
 
   public isDayIsUsed(selectedDay: number): boolean {
@@ -107,16 +104,20 @@ export class BusLineEditComponent implements OnInit, OnDestroy {
   public updateBusLine(): void {
     this.handleButtonClick();
 
-    this.busLineService.updateBusLine(this.updateBusLineForm.value, this.busLineId).pipe(
-      filter((data) => !!data && this.updateBusLineForm.valid),
+    this.busLineService.updateBusLine(this.updateBusLineForm.value, this.busLine._id).pipe(
+      filter((res:ICommonResponse<IBusLine>) => !!res && this.updateBusLineForm.valid),
       take(1),
-      finalize(() => {
+      tap((res:ICommonResponse<IBusLine>) => {
         this.loadingCtrl.dismiss();
         this.presentToast('Linija uspjesno uređena.');
-        this.router.navigate(['/konfiguracija/linije']);
+        this.modalCtrl.dismiss(res.data, 'save');
       }),
       takeUntil(this.componentDestroyed$),
     ).subscribe();
+  }
+
+  public dismissModal(): void {
+    this.modalCtrl.dismiss(null, 'dismiss');
   }
 
   async handleButtonClick() {

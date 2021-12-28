@@ -34,10 +34,7 @@ export class LoginPage implements OnInit, OnDestroy {
     this.userService.login(this.loginForm.get('email').value, this.loginForm.get('password').value).pipe(
       filter((data: IUser) => !!data && this.loginForm.valid),
       takeUntil(this.componentDestroyed$),
-      tap(() => {
-        console.log('passsed');
-        this.router.navigate(['/tyre-list']);
-      })
+      tap(() => this.router.navigate(['/karte']))
     ).subscribe();
   }
 

@@ -40,9 +40,7 @@ export class TicketEditComponent implements OnInit, AfterViewInit {
 
   myFilter = (d: Date): boolean => {
     const day = (d || new Date()).getDay();
-    console.log(day);
     const blockedDates = [this.dayOneStart, this.dayTwoStart];
-    console.log(blockedDates);
     return (blockedDates.includes(day));
   }
 
@@ -63,7 +61,6 @@ export class TicketEditComponent implements OnInit, AfterViewInit {
   public ngAfterViewInit():void {
     this.busLineService.getBusLines().pipe(
       tap((data: IBusLine[]) => {
-        console.log(this.ticketData.ticketBusLineId);
         const selectedLine: IBusLine[] = data.filter((line: IBusLine) => {
           return line._id === this.ticketData.ticketBusLineId;
         });
@@ -80,7 +77,6 @@ export class TicketEditComponent implements OnInit, AfterViewInit {
   }
 
   ngOnInit() {
-    console.log(this.ticketData);
     this.busLineService.getBusLines().pipe(
       filter((data: IBusLine[]) => !!data),
       takeUntil(this.componentDestroyed$),
@@ -107,9 +103,6 @@ export class TicketEditComponent implements OnInit, AfterViewInit {
 
         this.editTicketForm.valueChanges.pipe(
           filter((data: FormGroup) => !!data),
-          tap((data: FormGroup) => {
-            console.log(data);
-          }),
           takeUntil(this.componentDestroyed$),
         ).subscribe();
       }),
@@ -209,7 +202,6 @@ export class TicketEditComponent implements OnInit, AfterViewInit {
     await loading.present();
 
     const { role, data } = await loading.onDidDismiss();
-    console.log('Loading dismissed!');
   }
 
   public updateTicket(): void {

@@ -28,9 +28,6 @@ export class JwtInterceptor implements HttpInterceptor {
         }
       });
     } else {
-      localStorage.removeItem('user');
-      localStorage.setItem('nenad', 'nesto');
-
       this.accountService.logout();
       this.router.navigate(['/login']);
     }

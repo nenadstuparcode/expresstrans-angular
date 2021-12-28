@@ -12,7 +12,7 @@ import {
   concatMap,
   debounceTime,
   distinctUntilChanged,
-  filter, finalize,
+  filter,
   map,
   take,
   takeUntil,
@@ -65,9 +65,7 @@ export class TicketsListPage implements OnInit, OnDestroy {
     private loadingController: LoadingController,
     private platform: Platform,
     private toastController: ToastController,
-    private callNumber: CallNumber,
-
-    ) {}
+    private callNumber: CallNumber) {}
 
   ngOnInit() {
     this.searchBarForm = this.fb.group({
@@ -77,10 +75,9 @@ export class TicketsListPage implements OnInit, OnDestroy {
     this.searchBarForm.get('searchTerm').valueChanges.pipe(
       debounceTime(1200),
       distinctUntilChanged(),
-      tap((data: string) => {
-        console.log('from search func')
-        data.length ? this.getTickets(data, 10) : this.getTickets('', 10)
-      }),
+      tap((data: string) => data.length ?
+        this.getTickets(data, 10) :
+        this.getTickets('', 10)),
       takeUntil(this.componentDestroyed$),
     ).subscribe();
 
@@ -88,8 +85,6 @@ export class TicketsListPage implements OnInit, OnDestroy {
   }
 
   public getTickets(searchTerm: string, searchLimit: number, event?: any): void {
-    console.log('get tickets');
-
     this.presentLoading('Učitavanje karti...').then(() => {
       this.busLineService.getBusLines().pipe(
         filter((data: IBusLine[]) => !!data),
@@ -161,7 +156,6 @@ export class TicketsListPage implements OnInit, OnDestroy {
         }),
       ).subscribe();
     } else {
-      console.log('disabling infinite')
       this.infiniteScroll.disabled = true;
     }
   }
@@ -200,7 +194,6 @@ export class TicketsListPage implements OnInit, OnDestroy {
         text: 'Štampaj',
         icon: 'print',
         handler: () => {
-          console.log(ticket);
           this.printTicket(ticket);
         }
       },
@@ -221,7 +214,6 @@ export class TicketsListPage implements OnInit, OnDestroy {
     await actionSheet.present();
 
     const { role } = await actionSheet.onDidDismiss();
-    console.log('onDidDismiss resolved with role', role);
   }
 
   public callCustomer(phoneNum: string): void {
@@ -250,6 +242,11 @@ export class TicketsListPage implements OnInit, OnDestroy {
 
   async createTicket() {
     const modal = await this.modalController.create({component: CreateTicketComponent});
+    modal.onDidDismiss().then((data: any) => {
+      const newTicket: ITicket = { ...data.data,  busLineData: this.getBusLineData(data.data.ticketBusLineId)};
+      this.tickets.unshift(newTicket);
+    });
+
     return await modal.present();
   }
 
@@ -264,7 +261,7 @@ export class TicketsListPage implements OnInit, OnDestroy {
   }
 
   async presentLoading(msg: string) {
-    const loading = await this.loadingController.create({ message: msg });
+    const loading = await this.loadingController.create({ message: msg, duration:2000 });
     await loading.present();
   }
 
@@ -297,8 +294,7 @@ export class TicketsListPage implements OnInit, OnDestroy {
                 console.log("Saved external root directory");
               })
               .catch((error) => {
-                console.log(error);
-                console.log("Not saved");
+                return throwError(error);
               });
           } catch (err) {
             throwError(err);

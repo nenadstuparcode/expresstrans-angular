@@ -1,10 +1,18 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {FormArray, FormBuilder, FormGroup, Validators} from '@angular/forms';
-import {filter, finalize, take, takeUntil} from 'rxjs/operators';
+import {filter, finalize, take, takeUntil, tap} from 'rxjs/operators';
 import {Subject} from 'rxjs';
-import {LoadingController, PickerColumnOption, PickerController, ToastController} from '@ionic/angular';
+import {
+  LoadingController,
+  ModalController,
+  PickerColumnOption,
+  PickerController,
+  ToastController
+} from '@ionic/angular';
 import {BusLineService} from "@app/tab2/bus-line.service";
 import {Router} from "@angular/router";
+import {ICommonResponse} from "@app/services/user.interface";
+import {ICreateBusLineResponse} from "@app/tab2/tab2.interface";
 
 @Component({
   selector: 'app-bus-line-create',
@@ -33,7 +41,7 @@ export class BusLineCreateComponent implements OnInit, OnDestroy {
     private busLineService: BusLineService,
     private loadingCtrl: LoadingController,
     private toastCtrl: ToastController,
-    private router: Router) { }
+    private modalCtrl: ModalController) { }
 
   ngOnInit() {
     this.createBusLineForm = this.createForm();
@@ -96,15 +104,18 @@ export class BusLineCreateComponent implements OnInit, OnDestroy {
 
     this.busLineService.createBusLine(this.createBusLineForm.value).pipe(
       take(1),
-      filter((data) => !!data && this.createBusLineForm.valid),
-      finalize(() => {
+      filter((data:ICommonResponse<ICreateBusLineResponse>) => !!data && this.createBusLineForm.valid),
+      tap((data: ICommonResponse<ICreateBusLineResponse>) => {
         this.loadingCtrl.dismiss();
+        this.modalCtrl.dismiss(data.data, 'save');
         this.createBusLineForm.reset();
-        this.presentToast('Linija uspjesno kreirana.');
-        this.router.navigate(['/konfiguracija/linije']);
       }),
       takeUntil(this.componentDestroyed$),
     ).subscribe();
+  }
+
+  public dismissModal(): void {
+    this.modalCtrl.dismiss(null, 'dismiss');
   }
 
   async handleButtonClick() {

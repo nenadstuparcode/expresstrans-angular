@@ -2,7 +2,7 @@ import {Component, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core
 import {
   ActionSheetController,
   AlertController, IonInfiniteScroll,
-  LoadingController,
+  LoadingController, ModalController,
   PickerColumnOption,
   ToastController
 } from '@ionic/angular';
@@ -13,6 +13,8 @@ import {catchError, debounceTime, distinctUntilChanged, filter, finalize, take, 
 import {Subject} from 'rxjs';
 import {FormBuilder, FormGroup} from "@angular/forms";
 import {ICommonResponse} from "@app/services/user.interface";
+import {BusLineEditComponent} from "@app/tab2/components/bus-line-edit/bus-line-edit.component";
+import {BusLineCreateComponent} from "@app/tab2/components/bus-line-create/bus-line-create.component";
 
 @Component({
   selector: 'app-bus-lines',
@@ -54,6 +56,7 @@ export class BusLinesComponent implements OnInit, OnDestroy {
     private busLineService: BusLineService,
     public toastController: ToastController,
     private fb: FormBuilder,
+    private modalCtrl: ModalController,
     private loadingController: LoadingController) { }
 
   ngOnInit() {
@@ -72,7 +75,6 @@ export class BusLinesComponent implements OnInit, OnDestroy {
   }
 
   public getMoreBusLines(): void {
-    console.log(this.searchLimit);
     if(this.busLinesCount > this.searchLimit) {
         this.searchLimit += 10;
         this.busLineService.searchBusLines({searchTerm: this.searchTermValue, searchLimit: this.searchLimit}).pipe(
@@ -89,7 +91,6 @@ export class BusLinesComponent implements OnInit, OnDestroy {
           }),
         ).subscribe();
     } else {
-      console.log('disabling infinite')
       this.infiniteScroll.disabled = true;
     }
   }
@@ -113,9 +114,10 @@ export class BusLinesComponent implements OnInit, OnDestroy {
 
   public deleteBusLine(id: string): void {
     this.busLineService.deleteBusLine(id).pipe(
+      take(1),
       finalize(() => {
         this.presentToast();
-        this.getBusLines('', this.searchLimit);
+        this.busLines = [...this.busLines.filter((busLine: IBusLine) => busLine._id !== id)];
       }),
       takeUntil(this.componentDestroyed$),
     ).subscribe();
@@ -143,9 +145,7 @@ export class BusLinesComponent implements OnInit, OnDestroy {
       takeUntil(this.componentDestroyed$),
     ).subscribe();
   }
-  public createLine(): void {
-    this.router.navigate([`/konfiguracija/linije/kreiraj`]);
-  }
+
   async deleteBusLineModal(id: string) {
     const alert = await this.alertController.create({
       cssClass: 'my-custom-class',
@@ -178,7 +178,7 @@ export class BusLinesComponent implements OnInit, OnDestroy {
         role: 'uredi',
         icon: 'create-sharp',
         handler: () => {
-          this.router.navigate([`/konfiguracija/linije/uredi/${id}`]);
+          this.openEditBuslinetModal(this.busLines.find((line: IBusLine) => line._id === id));
         }
       },
       {
@@ -192,15 +192,46 @@ export class BusLinesComponent implements OnInit, OnDestroy {
         text: 'Odustani',
         icon: 'close',
         role: 'cancel',
-        handler: () => {
-          console.log('Cancel clicked');
-        }
       }]
     });
     await actionSheet.present();
 
     const { role } = await actionSheet.onDidDismiss();
-    console.log('onDidDismiss resolved with role', role);
+  }
+
+  public async openCreateBuslineModal() {
+    const modal = await this.modalCtrl.create(
+      { component: BusLineCreateComponent },
+    );
+
+    modal.onDidDismiss().then((data: any) => {
+      if(data.role === 'save') {
+        const newBusline: IBusLine = data.data;
+        this.busLines.unshift(newBusline);
+      }
+    });
+
+    return await modal.present();
+  }
+
+  public async openEditBuslinetModal(data: IBusLine) {
+    const modal = await this.modalCtrl.create(
+      {
+        component: BusLineEditComponent,
+        componentProps: {
+          'busLine': data,
+        },
+      }
+    );
+
+    modal.onDidDismiss().then((data: any) => {
+      if(data.role === 'save') {
+        const newBusline: IBusLine = data.data;
+        this.busLines.unshift(newBusline);
+      }
+    });
+
+    return await modal.present();
   }
 
   public ngOnDestroy(): void {

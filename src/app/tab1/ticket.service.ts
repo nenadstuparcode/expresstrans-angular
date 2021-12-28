@@ -3,7 +3,7 @@ import {Router} from '@angular/router';
 import {HttpClient} from '@angular/common/http';
 import {Observable} from 'rxjs';
 import {ICommonResponse} from '@app/services/user.interface';
-import {filter, map, pluck, tap} from 'rxjs/operators';
+import {filter, map, pluck} from 'rxjs/operators';
 import {ICreateTicketPayload, ICreateTicketResponse, ITicket} from "@app/tab1/ticket.interface";
 import { environment } from "@env/environment";
 
@@ -58,8 +58,6 @@ export class TicketService {
       'responseType'  : 'arraybuffer' as 'json'
       //'responseType'  : 'blob' as 'json'        //This also worked
     };
-
-    console.log(payload);
 
     return this.http.post(`${environment.apiUrl}/ticket/print`,payload, httpOptions).pipe(
       filter((data: any) => !!data),

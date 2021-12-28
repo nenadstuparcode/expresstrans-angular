@@ -3,7 +3,7 @@
     <ion-img class="app-logo" [src]="logoUrl"></ion-img>
 
     <ion-buttons slot="end">
-      <ion-icon (click)="logout()" class="logout-icon" name="log-out-outline"></ion-icon>
+      <ion-icon *ngIf="(isLoggedIn$ | async)" (click)="logout()" class="logout-icon" name="log-out-outline"></ion-icon>
     </ion-buttons>
   </ion-toolbar>
 
