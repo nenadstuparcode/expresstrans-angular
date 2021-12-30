@@ -2,7 +2,7 @@ import {Component, OnDestroy, OnInit} from '@angular/core';
 import { fadeAnimation } from '@app/animations';
 import {UserServiceService} from '@app/services/user-service.service';
 import {IUser} from '@app/services/user.interface';
-import {BehaviorSubject, Observable, of, Subject} from "rxjs";
+import {Observable, Subject} from "rxjs";
 
 @Component({
   selector: 'app-root',

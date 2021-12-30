@@ -99,7 +99,7 @@ export class CreateTicketComponent implements OnInit, OnDestroy {
   dismissModal() {
     this.modalController.dismiss({
       dismissed: true
-    });
+    }, 'dismiss');
   }
 
   public getColumns(): PickerColumn[] {
