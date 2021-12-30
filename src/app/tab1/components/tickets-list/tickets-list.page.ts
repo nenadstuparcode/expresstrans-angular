@@ -302,7 +302,10 @@ export class TicketsListPage implements OnInit, OnDestroy {
       .pipe(
         take(1),
         tap((response: ArrayBuffer) => {
-          if (this.platform.is('android') || this.platform.is('ios')) {
+          if (
+            this.platform.is('android') ||
+            this.platform.is('ios') &&
+            !this.platform.is('mobileweb')) {
             try {
               File.writeFile(
                 File.externalRootDirectory + '/Download',
