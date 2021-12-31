@@ -205,7 +205,7 @@ export class CreateTicketComponent implements OnInit, OnDestroy {
         tap((res:ICommonResponse<ICreateTicketResponse>) => {
           this.loadingCtrl.dismiss();
           this.presentToast();
-          this.modalController.dismiss(res.data);
+          this.modalController.dismiss(res.data, 'save');
         }),
         takeUntil(this.componentDestroyed$),
       ).subscribe();

@@ -109,10 +109,10 @@ export class TicketEditComponent implements OnInit, AfterViewInit {
     ).subscribe();
   }
 
-  dismissModal() {
+  dismissModal(role: string) {
     this.modalController.dismiss({
       dismissed: true
-    });
+    }, role);
   }
 
   public getColumns(): PickerColumn[] {
@@ -211,7 +211,7 @@ export class TicketEditComponent implements OnInit, AfterViewInit {
         finalize(() => {
           this.loadingCtrl.dismiss();
           this.presentToast();
-          this.dismissModal();
+          this.dismissModal('dismiss');
         }),
         takeUntil(this.componentDestroyed$),
       ).subscribe();

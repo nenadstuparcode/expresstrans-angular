@@ -263,6 +263,7 @@ export class TicketsListPage implements OnInit, OnDestroy {
     const modal = await this.modalController.create({ component: CreateTicketComponent });
     modal.onDidDismiss().then((data: any) => {
       if (data.role === 'save') {
+        console.log('saving ticket')
         const newTicket: ITicket = { ...data.data, busLineData: this.getBusLineData(data.data.ticketBusLineId) };
         this.tickets.unshift(newTicket);
       }
