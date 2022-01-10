@@ -1,9 +1,9 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
-import {Subject} from 'rxjs';
+import {Subject, throwError} from 'rxjs';
 import {FormBuilder, FormGroup, Validators} from '@angular/forms';
 import {UserServiceService} from '@app/services/user-service.service';
 import {IUser, IUserRegister} from '@app/services/user.interface';
-import {filter, takeUntil} from 'rxjs/operators';
+import {catchError, filter, takeUntil, tap} from 'rxjs/operators';
 
 @Component({
   selector: 'app-register',
@@ -39,9 +39,17 @@ export class RegisterPage implements OnInit, OnDestroy {
       password: this.registrationForm.controls.password.value,
     };
 
+    console.log(userData);
+
     this.service.register(userData).pipe(
       filter((data: IUser) => !!data),
       takeUntil(this.componentDestroyed$),
+      tap((data: IUser) => {
+        console.log(data);
+      }),
+      catchError((err: Error) => {
+        return throwError(err);
+      }),
     ).subscribe();
   }
 

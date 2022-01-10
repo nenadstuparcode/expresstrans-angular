@@ -51,7 +51,7 @@ export class BusLineService {
     );
   }
 
-  public searchBusLines(payload : {searchTerm: string, searchLimit: number}): Observable<ICommonResponse<IBusLine[]>> {
+  public searchBusLines(payload : {searchTerm: string, searchLimit: number, searchSkip: number}): Observable<ICommonResponse<IBusLine[]>> {
     return this.http.post(`${environment.apiUrl}/busLine/search`, payload ).pipe(
       filter((data: ICommonResponse<IBusLine[]>) => !!data),
     )

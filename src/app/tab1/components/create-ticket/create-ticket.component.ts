@@ -143,11 +143,6 @@ export class CreateTicketComponent implements OnInit, OnDestroy {
   }
 
   public selectDate(event: any): void {
-    console.log(event.value);
-    console.log(this.createTicketForm.controls['ticketStartDate']);
-
-    console.log(event.value.getDay());
-    console.log(this.daysForLine);
     this.createTicketForm.controls.ticketStartTime.setValue(this.daysForLine.find((item: any) => item.day == event.value.getDay()).time);
   }
 

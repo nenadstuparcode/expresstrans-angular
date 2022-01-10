@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, Input, OnInit, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {MatDatepicker} from "@angular/material/datepicker";
 import {FormBuilder, FormGroup, Validators} from "@angular/forms";
 import {Subject} from "rxjs";
@@ -21,26 +21,26 @@ import {ITicket} from "@app/tab1/ticket.interface";
   templateUrl: './ticket-edit.component.html',
   styleUrls: ['./ticket-edit.component.scss'],
 })
-export class TicketEditComponent implements OnInit, AfterViewInit {
+export class TicketEditComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild(MatDatepicker) datepicker: MatDatepicker<Date>;
   @Input() ticketData: ITicket = null;
   public editTicketForm: FormGroup;
 
   public componentDestroyed$: Subject<void> = new Subject<void>();
-  public startInGermany: boolean = false;
-  public phoneNumber: string = '';
   public email: string = '';
   public minDate: Date;
   public columnOptions: PickerColumnOption[] = [];
   public pickedOption: any;
-  public dayOneStart: number = 0;
-  public dayTwoStart: number = 0;
   public startTime: string = '';
+  public availableDays: number[] = [];
+  public daysForLine: any[] = [];
 
 
   myFilter = (d: Date): boolean => {
     const day = (d || new Date()).getDay();
-    const blockedDates = [this.dayOneStart, this.dayTwoStart];
+    console.log(day);
+    const blockedDates = [...this.availableDays];
+    console.log(blockedDates);
     return (blockedDates.includes(day));
   }
 
@@ -99,6 +99,7 @@ export class TicketEditComponent implements OnInit, AfterViewInit {
           ticketBusLineId: this.fb.control(this.ticketData.ticketBusLineId, Validators.required),
           ticketRoundTrip: this.fb.control(this.ticketData.ticketRoundTrip, Validators.required),
           ticketStartDate: this.fb.control(this.ticketData.ticketStartDate, Validators.required),
+          ticketStartTime: this.fb.control(this.ticketData.ticketStartTime, Validators.required),
         });
 
         this.editTicketForm.valueChanges.pipe(
@@ -156,25 +157,25 @@ export class TicketEditComponent implements OnInit, AfterViewInit {
   }
 
   public selectDate(event: any): void {
-    console.log(event.value);
-    console.log(this.editTicketForm.controls['ticketStartDate']);
+    this.editTicketForm.controls.ticketStartTime.setValue(this.daysForLine.find((item: any) => item.day == event.value.getDay()).time);
   }
 
   public handleBusLine(selectedLine: any): void {
 
-    this.dayOneStart = selectedLine.linija.value.lineStartDay1;
-    this.dayTwoStart = selectedLine.linija.value.lineStartDay2;
-    this.startTime = selectedLine.linija.value.lineStartTime;
     this.datepicker.disabled = true;
     this.datepicker.disabled = false;
     this.datepicker._getDateFilter();
 
-
     this.pickedOption = selectedLine;
+
+    // reset datepicker to invalid days
+    this.availableDays = selectedLine.linija.value.lineArray.map((line: any) =>  line.day);
+    this.daysForLine = selectedLine.linija.value.lineArray;
 
     // reset datepicker to invalid days
     this.editTicketForm.controls['ticketBusLineId'].setValue(selectedLine.linija.value._id);
     this.editTicketForm.controls['ticketStartDate'].setValue('');
+    this.editTicketForm.controls['ticketStartTime'].setValue('');
   }
 
   async handleButtonClick() {

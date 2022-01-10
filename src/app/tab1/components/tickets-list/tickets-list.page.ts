@@ -17,6 +17,7 @@ import {
   debounceTime,
   distinctUntilChanged,
   filter,
+  finalize,
   map,
   take,
   takeUntil,
@@ -41,20 +42,22 @@ import { CallNumber } from '@awesome-cordova-plugins/call-number/ngx';
   templateUrl: './tickets-list.page.html',
   styleUrls: ['./tickets-list.page.scss'],
 })
+
 export class TicketsListPage implements OnInit, OnDestroy {
   @ViewChild(IonInfiniteScroll) infiniteScroll: IonInfiniteScroll;
   @ViewChild('link') link: any;
   public componentDestroyed$: Subject<void> = new Subject<void>();
   public searchLimit: number = 10;
-  public ticketsCount: number = 10;
+  public searchSkip: number = 0;
+  public ticketsCount: number = 0;
   public searchTermValue: string = '';
   public searchBarForm: FormGroup;
   public bihImage: string = 'assets/images/bih.png';
   public deImage: string = 'assets/images/germany.png';
   public tickets: ITicket[] = [];
   public busLines: IBusLine[] = [];
-  public ticketToPrintLink: string;
   public linkUrl: string = '';
+  public ticketTotalCount: number = 0;
 
   constructor(
     private pickerCtrl: PickerController,
@@ -82,27 +85,28 @@ export class TicketsListPage implements OnInit, OnDestroy {
       .valueChanges.pipe(
         debounceTime(1200),
         distinctUntilChanged(),
-        tap((data: string) => (data.length ? this.getTickets(data, 10) : this.getTickets('', 10))),
+        tap((data: string) => (data.length ? this.getTickets(data, 10, 0) : this.getTickets('', 10, 0))),
         takeUntil(this.componentDestroyed$),
       )
       .subscribe();
 
-    this.getTickets('', this.searchLimit);
+    this.getTickets('', this.searchLimit, 0);
   }
 
-  public getTickets(searchTerm: string, searchLimit: number, event?: any): void {
+  public getTickets(searchTerm: string, searchLimit: number, searchSkip: number, event?: any): void {
     this.presentLoading('Učitavanje karti...').then(() => {
       this.busLineService
         .getBusLines()
         .pipe(
           filter((data: IBusLine[]) => !!data),
           tap((data: IBusLine[]) => (this.busLines = data)),
-          concatMap(() => this.ticketService.searchTickets({ searchTerm: searchTerm, searchLimit: searchLimit })),
+          concatMap(() => this.ticketService.searchTickets({ searchTerm: searchTerm, searchLimit: searchLimit, searchSkip: searchSkip })),
           filter((data: ICommonResponse<ITicket[]>) => !!data),
           map((data: ICommonResponse<ITicket[]>) => {
-            this.ticketsCount = data.count;
+            this.ticketTotalCount = data.count;
             this.searchLimit = searchLimit;
             this.searchTermValue = searchTerm;
+            this.searchSkip = 0;
 
             return data.data.map((ticket: ITicket) => {
               return {
@@ -113,11 +117,13 @@ export class TicketsListPage implements OnInit, OnDestroy {
           }),
           tap((data: ITicket[]) => {
             this.tickets = [...data];
+            this.ticketsCount = this.tickets.length;
 
             if (event) {
               event.target.complete();
             }
 
+            this.handleInfinitiveLoader();
             this.loadingController.dismiss();
           }),
           catchError((err: Error) => {
@@ -137,10 +143,10 @@ export class TicketsListPage implements OnInit, OnDestroy {
 
   public getMoreTickets(): void {
     this.presentLoading('Učitavanje karti...');
-    if (this.ticketsCount > this.searchLimit) {
-      this.searchLimit += 10;
+    if (this.ticketsCount <= this.ticketTotalCount) {
+      this.searchSkip += 10;
       this.ticketService
-        .searchTickets({ searchTerm: this.searchTermValue, searchLimit: this.searchLimit })
+        .searchTickets({ searchTerm: this.searchTermValue, searchLimit: this.searchLimit, searchSkip: this.searchSkip })
         .pipe(
           filter((data: ICommonResponse<ITicket[]>) => !!data),
           take(1),
@@ -154,11 +160,16 @@ export class TicketsListPage implements OnInit, OnDestroy {
             });
           }),
           tap((tickets: ITicket[]) => {
-            this.tickets = [...this.tickets, ...tickets];
-            this.ticketsCount = this.tickets.length;
+            if(tickets.length) {
+              this.tickets = [...this.tickets, ...tickets];
+              this.ticketsCount = this.tickets.length;
+            } else {
+              this.infiniteScroll.disabled = true;
+            }
           }),
-          tap(() => {
-            if (this.ticketsCount > this.searchLimit) {
+          finalize(() => {
+            this.handleInfinitiveLoader();
+            if (this.ticketsCount >= this.ticketTotalCount) {
               this.infiniteScroll.disabled = true;
             }
 
@@ -166,6 +177,8 @@ export class TicketsListPage implements OnInit, OnDestroy {
           }),
           catchError((error: Error) => {
             this.loadingController.dismiss();
+            this.infiniteScroll.disabled = true;
+
             return throwError(error);
           }),
         )
@@ -173,6 +186,11 @@ export class TicketsListPage implements OnInit, OnDestroy {
     } else {
       this.infiniteScroll.disabled = true;
     }
+  }
+
+  public handleInfinitiveLoader(): void {
+    this.infiniteScroll.disabled = true;
+    this.infiniteScroll.disabled = false;
   }
 
   public getBusLineData(busLineId: string): IBusLine {
@@ -248,8 +266,11 @@ export class TicketsListPage implements OnInit, OnDestroy {
     this.ticketService
       .emailTicket(ticket)
       .pipe(
-        filter((data: boolean) => !!data),
-        tap(() => this.loadingController.dismiss()),
+        filter((data: ICommonResponse<boolean>) => !!data),
+        tap((data: ICommonResponse<boolean>) => {
+          this.presentToast(data.message);
+          this.loadingController.dismiss();
+        }),
         catchError((error: Error) => {
           this.loadingController.dismiss();
           return throwError(error);
@@ -263,7 +284,6 @@ export class TicketsListPage implements OnInit, OnDestroy {
     const modal = await this.modalController.create({ component: CreateTicketComponent });
     modal.onDidDismiss().then((data: any) => {
       if (data.role === 'save') {
-        console.log('saving ticket')
         const newTicket: ITicket = { ...data.data, busLineData: this.getBusLineData(data.data.ticketBusLineId) };
         this.tickets.unshift(newTicket);
       }
@@ -303,10 +323,7 @@ export class TicketsListPage implements OnInit, OnDestroy {
       .pipe(
         take(1),
         tap((response: ArrayBuffer) => {
-          if (
-            this.platform.is('android') ||
-            this.platform.is('ios') &&
-            !this.platform.is('mobileweb')) {
+          if (this.platform.is('android') || (this.platform.is('ios') && !this.platform.is('mobileweb'))) {
             try {
               File.writeFile(
                 File.externalRootDirectory + '/Download',
@@ -367,7 +384,6 @@ export class TicketsListPage implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    console.log('destroy ticket list');
     this.componentDestroyed$.next();
     this.componentDestroyed$.complete();
   }

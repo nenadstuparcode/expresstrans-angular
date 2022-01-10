@@ -7,13 +7,13 @@
   </ion-toolbar>
 </ion-header>
 <ion-content fullscreen>
-  <ion-refresher (ionRefresh)="getBusLines(searchTermValue, 10, $event)" slot="fixed" pullFactor="0.5" pullMin="100" pullMax="200">
+  <ion-refresher (ionRefresh)="getBusLines(searchTermValue, 10, 0, $event)" slot="fixed" pullFactor="0.5" pullMin="100" pullMax="200">
     <ion-refresher-content></ion-refresher-content>
   </ion-refresher>
   <ion-grid class="bus-line-container">
     <ion-row>
       <ion-col [formGroup]="searchBarForm" size-xs="12" size-md="6" offset-md="3">
-        <ion-searchbar formControlName="searchTerm" placeholder="Pretraži" (ionClear)="getBusLines('', 10)"></ion-searchbar>
+        <ion-searchbar formControlName="searchTerm" placeholder="Pretraži" (ionClear)="getBusLines('', 10, 0)"></ion-searchbar>
       </ion-col>
       <ion-col size-md="6" offset-md="3">
         <ng-container *ngIf="busLines.length">
@@ -69,7 +69,7 @@
       </ion-col>
     </ion-row>
   </ion-grid>
-  <ion-infinite-scroll *ngIf="busLinesCount > searchLimit" threshold="40px" (ionInfinite)="getMoreBusLines()">
+  <ion-infinite-scroll threshold="40px" (ionInfinite)="getMoreBusLines()">
     <ion-infinite-scroll-content
       loadingSpinner="bubbles"
       loadingText="Učitavanje rezultata...">

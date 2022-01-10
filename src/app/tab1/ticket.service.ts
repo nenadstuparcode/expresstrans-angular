@@ -47,7 +47,7 @@ export class TicketService {
     );
   }
 
-  public searchTickets(payload : {searchTerm: string, searchLimit: number}): Observable<ICommonResponse<ITicket[]>> {
+  public searchTickets(payload : {searchTerm: string, searchLimit: number, searchSkip: number}): Observable<ICommonResponse<ITicket[]>> {
     return this.http.post(`${environment.apiUrl}/ticket/search`, payload ).pipe(
       filter((data: ICommonResponse<ITicket[]>) => !!data),
     )
@@ -67,13 +67,10 @@ export class TicketService {
     )
   }
 
-  public emailTicket(payload: ITicket): Observable<boolean> {
+  public emailTicket(payload: ITicket): Observable<ICommonResponse<boolean>> {
     return this.http.post(`${environment.apiUrl}/ticket/email`, payload).pipe(
       filter((data: ICommonResponse<boolean>) => !!data),
-      map((data: ICommonResponse<boolean>) => {
-        return data.data
-      }),
-    )
+    );
   }
 
 }

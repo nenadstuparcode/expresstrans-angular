@@ -7,15 +7,21 @@
 <ion-content>
   <ion-row>
     <ion-col size-md="4" offset-md="4">
-      <ion-card>
+      <ion-card [formGroup]="otpForm">
+
+        <ion-item>
+          <ion-label position="stacked">Email</ion-label>
+          <ion-input formControlName="email" type="email"></ion-input>
+        </ion-item>
 
         <ion-item>
           <ion-label position="stacked">Verifikacioni Kod (4 cifre)</ion-label>
-          <ion-input type="number" [maxlength]="4" [minlength]="4"></ion-input>
+          <ion-input formControlName="code" type="number" [maxlength]="4" [minlength]="4"></ion-input>
         </ion-item>
 
-        <ion-button (click)="sendVerificationCode()" [disabled]="true" class="login-button">Potvrdi Kod</ion-button>
+        <ion-button [disabled]="!otpForm.valid" (click)="sendVerificationCode()" class="login-button">Potvrdi Kod</ion-button>
         <ion-button (click)="resendVerificationCode()" class="login-button" size="small">Posalji novi kod</ion-button>
+        <ion-button class="login-button" size="small" routerLink="/login">Idi na login</ion-button>
 
       </ion-card>
     </ion-col>

@@ -1,6 +1,6 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {FormArray, FormBuilder, FormGroup, Validators} from '@angular/forms';
-import {filter, finalize, take, takeUntil, tap} from 'rxjs/operators';
+import {filter, take, takeUntil, tap} from 'rxjs/operators';
 import {Subject} from 'rxjs';
 import {
   LoadingController,
@@ -10,7 +10,6 @@ import {
   ToastController
 } from '@ionic/angular';
 import {BusLineService} from "@app/tab2/bus-line.service";
-import {Router} from "@angular/router";
 import {ICommonResponse} from "@app/services/user.interface";
 import {ICreateBusLineResponse} from "@app/tab2/tab2.interface";
 

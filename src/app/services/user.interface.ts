@@ -24,3 +24,8 @@ export interface IUserLoginResponse {
   status: 1 | 0;
   message: string;
 }
+
+export interface IResponse {
+  status: 1 | 0;
+  message: string;
+}
